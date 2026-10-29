@@ -1,13 +1,17 @@
 {
-  "heroImage": "images/candidates-group.webp",
+  "privacyNotice": "접수 의견 검토 및 선택적 답변을 위해 작성자가 제출한 내용을 처리합니다. 이름과 이메일은 선택 사항입니다.",
+  "heroImage": "/images/25100581.jpg",
+  "privacyController": "",
+  "facebookUrl": "",
   "heroCaption": "현장의 기대에 실천으로 답하겠습니다.",
+  "telegramUrl": "",
   "candidates": [
     {
       "role": "본부장 후보",
       "name": "김진희",
       "tag": "더 가까이",
       "description": "3년의 성과와 경험으로 현장에 더 가까이",
-      "photo": "images/candidate-kim.webp",
+      "photo": "/images/25109483.jpg",
       "career": "(현) 민주노총 경기도본부 본부장\n(전) 전국교육공무직본부 경기지부 수석부지부장\n(전) 공공운수노조 전국교육공무직본부 사무처장"
     },
     {
@@ -15,7 +19,7 @@
       "name": "이상언",
       "tag": "더 강하게",
       "description": "투쟁과 연대의 힘을 더 강하게",
-      "photo": "images/candidate-lee.webp",
+      "photo": "/images/25109971.jpg",
       "career": "(현) 민주노총 청소년 노동인권 강사단\n(전) 민주노총 경기도본부 본부장\n기아차 최초 통상임금 소송·불법파견 투쟁 조직 및 승소"
     },
     {
@@ -23,10 +27,12 @@
       "name": "백순옥",
       "tag": "기대 그 이상",
       "description": "현장의 요구를 실천으로",
-      "photo": "images/candidate-baek.webp",
+      "photo": "/images/25109002.jpg",
       "career": "(현) 전교조 안산지회 분오초 분회장\n(현) 전교조 참교육연구소 초등노동교육연구팀\n(전) 전교조 경기지부 안양과천지회장"
     }
   ],
+  "news": [],
+  "videoUrl": "",
   "promises": [
     {
       "tag": "더 가까이",
@@ -79,12 +85,6 @@
       "body": "• 동의 없는 AI·로봇 도입 전면 금지 (거부권)\n• 도입 전 고용·산업안전보건 영향평가 의무화\n• 알고리즘 설명권, 감사권, 이의제기권 보장\n• 기계 도입을 이유로 한 해고 및 외주화 금지\n• 하청 및 연관(공급망 내) 노동의 정규직화\n• 생산성 이익의 노동시간 단축 및 연대 임금/사회적 환원\n• 공공보조금 수령 기업의 자동화 해고 금지\n• 데이터 공동감시권 및 노동자 프라이버시 보호"
     }
   ],
-  "news": [],
-  "videoUrl": "",
-  "telegramUrl": "",
-  "facebookUrl": "",
   "contactEmail": "",
-  "privacyController": "",
-  "retentionPeriod": "선거 종료 후 30일 이내 파기(운영 확정 후 수정)",
-  "privacyNotice": "접수 의견 검토 및 선택적 답변을 위해 작성자가 제출한 내용을 처리합니다. 이름과 이메일은 선택 사항입니다."
+  "retentionPeriod": "선거 종료 후 30일 이내 파기(운영 확정 후 수정)"
 }
