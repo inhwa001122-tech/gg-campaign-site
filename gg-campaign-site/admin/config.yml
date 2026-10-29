@@ -1,0 +1,55 @@
+# 중요: 이 파일은 GitHub 저장소와 인증을 연결한 후에만 작동합니다.
+# YOUR_GITHUB_USERNAME/YOUR_REPOSITORY 를 실제 값으로 바꾸세요.
+backend:
+  name: github
+  repo: YOUR_GITHUB_USERNAME/YOUR_REPOSITORY
+  branch: main
+media_folder: images
+public_folder: /images
+site_url: https://YOUR-SITE.netlify.app
+locale: ko
+publish: true
+collections:
+  - name: main
+    label: 홈페이지 관리
+    files:
+      - name: site
+        label: 홈페이지 내용 및 사진
+        file: content/site.json
+        format: json
+        fields:
+          - {label: 메인 후보 단체사진, name: heroImage, widget: image, required: false}
+          - {label: 메인 설명 문구, name: heroCaption, widget: string}
+          - label: 후보 소개
+            name: candidates
+            widget: list
+            fields:
+              - {label: 직책, name: role, widget: string}
+              - {label: 후보 이름, name: name, widget: string}
+              - {label: 핵심 슬로건, name: tag, widget: string}
+              - {label: 소개 한 줄, name: description, widget: string}
+              - {label: 사진, name: photo, widget: image, required: false}
+              - {label: 경력 및 소개, name: career, widget: text}
+          - label: 핵심 공약
+            name: promises
+            widget: list
+            fields:
+              - {label: 분류, name: tag, widget: string}
+              - {label: 제목, name: title, widget: string}
+              - {label: 상세 내용, name: body, widget: text}
+          - label: 선거운동 소식
+            name: news
+            widget: list
+            summary: '{{fields.date}} · {{fields.title}}'
+            fields:
+              - {label: 게시 날짜, name: date, widget: datetime, format: 'YYYY-MM-DD', date_format: 'YYYY-MM-DD', time_format: false}
+              - {label: 제목, name: title, widget: string}
+              - {label: 대표 사진, name: image, widget: image, required: false}
+              - {label: 내용, name: content, widget: text}
+          - {label: 홍보영상 링크, name: videoUrl, widget: string, required: false}
+          - {label: 텔레그램 링크, name: telegramUrl, widget: string, required: false}
+          - {label: 페이스북 링크, name: facebookUrl, widget: string, required: false}
+          - {label: 개인정보 처리 주체, name: privacyController, widget: string, required: false}
+          - {label: 개인정보 담당 문의 이메일, name: contactEmail, widget: string, required: false}
+          - {label: 의견 보관 및 파기 기간, name: retentionPeriod, widget: string}
+          - {label: 개인정보 수집 목적 안내, name: privacyNotice, widget: text}
