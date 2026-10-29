@@ -3,7 +3,7 @@
 backend:
   name: github
   repo: inhwa001122-tech/gg-campaign-site
-  branch: main
+media_folder: gg-campaign-site/images
 media_folder: images
 public_folder: /images
 site_url: https://admirable-souffle-a68f64.netlify.app
@@ -15,7 +15,7 @@ collections:
     files:
       - name: site
         label: 홈페이지 내용 및 사진
-        file: content/site.json
+        file: gg-campaign-site/content/site.json
         format: json
         fields:
           - {label: 메인 후보 단체사진, name: heroImage, widget: image, required: false}
