@@ -4,7 +4,6 @@ backend:
   name: github
   repo: inhwa001122-tech/gg-campaign-site
   branch: main
-
 media_folder: gg-campaign-site/images
 public_folder: /images
 site_url: https://admirable-souffle-a68f64.netlify.app
