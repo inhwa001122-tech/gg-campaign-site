@@ -2,8 +2,9 @@
   "privacyNotice": "접수 의견 검토 및 선택적 답변을 위해 작성자가 제출한 내용을 처리합니다. 이름과 이메일은 선택 사항입니다.",
   "heroImage": "/images/25100581.jpg",
   "privacyController": "",
-  "facebookUrl": "",
+  "facebookUrl": "https://www.facebook.com/share/1CEZHsZZWb/?mibextid=wwXIfr",
   "heroCaption": "현장의 기대에 실천으로 답하겠습니다.",
+  "youtubeUrl": "https://www.youtube.com/@경기도본부2번에도",
   "telegramUrl": "https://t.me/+FriTf8gd-TwwYjA1",
   "candidates": [
     {
@@ -93,5 +94,6 @@
     }
   ],
   "contactEmail": "",
+  "instagramUrl": "https://www.instagram.com/v2v_jin_lee_baek_2?psln=M2E1amFzMjBidjd5&utm_source=qr",
   "retentionPeriod": "선거 종료 후 30일 이내 파기(운영 확정 후 수정)"
 }
