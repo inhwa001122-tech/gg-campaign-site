@@ -1,0 +1,59 @@
+/* 현장의 목소리 - 기존 홈페이지의 다른 구역에 영향을 주지 않는 전용 스타일 */
+#voice .container {max-width:1180px}
+#voice .voice-top{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:28px}
+#voice .voice-text{max-width:650px}
+#voice .voice-text p{line-height:1.8}
+#voice .voice-promise{max-width:350px;background:#fff6f6;border:1px solid #efcbd0;border-radius:14px;padding:20px;color:#7d1724;display:grid;gap:10px;line-height:1.6}
+#voice .voice-promise span{font-size:13px;color:#665e62}
+#voice .board-layout{display:grid;grid-template-columns:minmax(290px,0.89fr) minmax(0,1.11fr);gap:25px;align-items:start}
+#voice .board-form-card{min-width:0}
+#voice .board-form-card .form-heading h3{font-size:22px}
+#voice .board-form-card label{display:block;font-weight:700;margin:18px 0 8px}
+#voice .board-form-card input:not([type=checkbox]),#voice .board-form-card select,#voice .board-form-card textarea{display:block;width:100%;font-family:inherit;box-sizing:border-box;border-radius:8px;border:1px solid #d5d5d5;background:white;color:#212121;padding:13px;font-size:15px}
+#voice .board-form-card textarea{min-height:175px;resize:vertical;line-height:1.65}
+#voice .board-honeypot{position:absolute!important;left:-99999px!important;width:1px;height:1px;overflow:hidden}
+#voice .board-warning{margin-top:19px;padding:13px 15px;background:#f7f6f5;border-radius:8px;color:#555}
+#voice .board-warning strong{font-size:13px;color:#333}
+#voice .board-warning p{font-size:12px;line-height:1.7;margin:6px 0 0}
+#voice .board-form-card .board-ack{display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:500;line-height:1.6}
+#voice .board-ack input{margin-top:3px;accent-color:#c9252d}
+#voice .board-form-card .submit-btn{width:100%;margin-top:10px}
+#voice .board-form-card .submit-btn:disabled{opacity:.55;cursor:wait}
+#voice .board-status{font-size:13px;min-height:20px;line-height:1.6;margin:10px 0 0;color:#31744f}
+#voice .board-error{color:#af2431!important}
+#voice .board-list-wrap{background:#fff;border:1px solid #e7e4e2;border-radius:17px;padding:23px;min-width:0;box-shadow:0 8px 26px rgba(0,0,0,.035)}
+#voice .board-list-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#voice .board-list-head h3{font-size:21px;margin:8px 0 2px;line-height:1.4}
+#voice .board-list-help{font-size:12px;color:#777;line-height:1.7;margin:8px 0 21px}
+#voice .board-small-btn,#voice .board-admin-row button,#voice .board-more{white-space:nowrap;cursor:pointer;font:inherit;border:1px solid #d7d0d0;background:#fff;color:#555;padding:9px 12px;border-radius:8px;font-size:12px}
+#voice .board-small-btn:hover,#voice .board-more:hover{border-color:#c9252d;color:#c9252d}
+#voice .board-post{padding:19px 0;border-top:1px solid #ece9e8}
+#voice .board-post-hidden{background:#fff5f5;padding:20px;border-radius:7px;opacity:.83}
+#voice .board-meta{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+#voice .board-anon{font-weight:750;font-size:12px;color:#b21e30}
+#voice .board-topic{background:#f5f0f0;border-radius:20px;padding:3px 8px;color:#746d6c;font-size:11px}
+#voice .board-date{font-size:11px;color:#9b9895}
+#voice .board-hidden-mark{background:#d34141;color:white;font-size:10px;padding:2px 5px;border-radius:4px}
+#voice .board-post-title{font-size:17px;line-height:1.5;color:#242020;margin:12px 0 6px;overflow-wrap:anywhere}
+#voice .board-post-body{font-size:14px;color:#4f4c4b;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;margin:5px 0 0}
+#voice .board-reply{border-left:3px solid #c9252d;background:#fbf6f6;padding:12px 15px;margin-top:17px;border-radius:0 8px 8px 0}
+#voice .board-reply-title{color:#a61d2b;font-size:13px}
+#voice .board-reply .board-date{display:block;margin-top:10px}
+#voice .board-reply-pending{font-size:12px;color:#a6a09e;margin-top:14px}
+#voice .board-empty{padding:40px 12px;text-align:center;color:#777;font-size:13px;line-height:1.8}
+#voice .board-more{width:100%;margin-top:15px}
+#voice .board-post-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+#voice .board-danger-btn{background:#fff;color:#a5282a;border:1px solid #e8b0b0;border-radius:7px;padding:9px 12px;cursor:pointer;font-size:12px}
+#voice .board-reply-editor{margin-top:14px;padding:12px;background:#faf6f6;border-radius:8px}
+#voice .board-reply-editor strong{font-size:13px}
+#voice .board-reply-editor textarea{width:100%;min-height:110px;border:1px solid #ddd;border-radius:7px;padding:12px;resize:vertical;box-sizing:border-box;font:inherit;line-height:1.6;margin-top:10px}
+#voice .board-admin-area{margin-top:22px;border-top:1px solid #ddd;padding-top:16px}
+#voice .board-admin-toggle{font-size:12px;border:0;background:transparent;color:#76716f;cursor:pointer;padding:10px 0;text-decoration:underline;text-underline-offset:3px}
+#voice .board-admin-panel{background:white;border:1px solid #dedada;border-radius:12px;padding:19px;max-width:620px}
+#voice .board-admin-login label{font-weight:700;font-size:13px;display:block;margin-bottom:8px}
+#voice .board-admin-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+#voice .board-admin-row input{min-width:200px;flex:1;border:1px solid #ddd;border-radius:7px;padding:11px}
+#voice .board-admin-row button{background:#262626;color:white}
+#voice .board-admin-login small,#voice .board-admin-actions p{display:block;margin-top:10px;font-size:12px;line-height:1.7;color:#777}
+@media(max-width:850px){#voice .board-layout{grid-template-columns:1fr}#voice .voice-top{align-items:stretch;flex-direction:column}#voice .voice-promise{max-width:none}}
+@media(max-width:480px){#voice .board-list-wrap{padding:15px}#voice .board-list-head h3{font-size:18px}#voice .board-form-card .form-heading h3{font-size:19px}}

@@ -1,0 +1,9 @@
+{
+  "name": "gg-campaign-voice-board",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "11.1.7"
+  }
+}

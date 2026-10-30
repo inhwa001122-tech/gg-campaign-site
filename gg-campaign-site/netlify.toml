@@ -1,5 +1,6 @@
 [build]
   publish = "."
+  functions = "netlify/functions"
 [[headers]]
   for = "/admin/*"
   [headers.values]
@@ -10,3 +11,8 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/.netlify/functions/board"
+  [headers.values]
+    Cache-Control = "no-store"
