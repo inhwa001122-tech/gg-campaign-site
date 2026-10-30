@@ -3,7 +3,7 @@
 [build]
   publish = "gg-campaign-site"
   functions = "gg-campaign-site/netlify/functions"
-  command = "npm install --prefix gg-campaign-site --no-audit --no-fund"
+  command = "npm ci --prefix gg-campaign-site --omit=dev --no-audit --no-fund"
 
 [functions]
   node_bundler = "esbuild"

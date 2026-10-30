@@ -9,6 +9,14 @@
       const sec=document.createElement('section');sec.id='snsQuick';sec.className='sns-quick';sec.setAttribute('aria-label','SNS 소통채널');
       sec.innerHTML='<div class="container"><div class="sns-wrap"><p class="sns-heading">기호 2번, SNS로 더 가까이 소통합니다</p><div class="sns-list" id="snsList"></div></div></div>';
       candidates.parentNode.insertBefore(sec,candidates);
+      const support=document.createElement('aside');support.className='support-banner';support.setAttribute('aria-label','우리 후보 응원하기');
+      support.innerHTML='<div class="container"><div class="support-row"><strong>우리 후보 응원하기</strong><span>농협 <b id="supportAccount">235073-56-037994</b> <span class="support-owner">예금주 성지현</span></span><button type="button" id="copyAccount">계좌번호 복사</button><span id="copyAccountStatus" role="status" aria-live="polite"></span></div></div>';
+      sec.insertAdjacentElement('afterend',support);
+      support.querySelector('button').addEventListener('click',async()=>{
+        const status=document.getElementById('copyAccountStatus');
+        try { await navigator.clipboard.writeText('235073-56-037994');status.textContent='계좌번호를 복사했습니다.'; }
+        catch { status.textContent='복사하지 못했습니다. 계좌번호를 길게 눌러 복사해 주세요.'; }
+      });
     }
   }
   function renderSocial(data){
@@ -44,7 +52,7 @@
     const obs=new MutationObserver(()=>wrapMobileDetails());
     ['candidateGrid','pledgeGrid'].forEach(id=>{const x=document.getElementById(id);if(x)obs.observe(x,{childList:true,subtree:true})});
     wrapMobileDetails();
-    fetch('content/site.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(renderSocial).catch(()=>renderSocial({}));
+    window.loadCampaignSite().then(renderSocial).catch(()=>renderSocial({}));
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

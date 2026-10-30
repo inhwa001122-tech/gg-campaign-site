@@ -1,0 +1,9 @@
+**/node_modules/
+.netlify/
+.env
+.env.*
+!.env.example
+test-results/
+playwright-report/
+# Deploy Preview refresh after campaign integration
+# Preview redeploy after BOARD_ADMIN_SECRET deploy-preview scope configured
