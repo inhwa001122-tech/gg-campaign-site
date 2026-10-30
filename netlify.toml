@@ -1,0 +1,26 @@
+# Netlify build configuration for the repository root.
+# Keep the existing site in the gg-campaign-site subfolder.
+[build]
+  publish = "gg-campaign-site"
+  functions = "gg-campaign-site/netlify/functions"
+  command = "npm install --prefix gg-campaign-site --no-audit --no-fund"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/.netlify/functions/board"
+  [headers.values]
+    Cache-Control = "no-store"
