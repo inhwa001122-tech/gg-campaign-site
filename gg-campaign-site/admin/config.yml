@@ -6,7 +6,7 @@ backend:
   branch: main
 media_folder: gg-campaign-site/images
 public_folder: /images
-site_url: https://admirable-souffle-a68f64.netlify.app
+site_url: https://thethe-up-2.netlify.app
 locale: ko
 publish: true
 collections:
