@@ -37,7 +37,8 @@ collections:
               - {label: 분류, name: tag, widget: string}
               - {label: 제목, name: title, widget: string}
               - {label: 상세 내용, name: body, widget: text}
-          - label: 선거운동 소식
+          - label: 기존 선거운동 소식 자료
+            hint: 새 소식과 사진은 홈페이지의 선본 관리자 메뉴에서 등록하세요.
             name: news
             widget: list
             summary: '{{fields.date}} · {{fields.title}}'

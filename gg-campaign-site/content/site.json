@@ -4,6 +4,7 @@
   "privacyController": "",
   "facebookUrl": "https://www.facebook.com/share/1CEZHsZZWb/?mibextid=wwXIfr",
   "heroCaption": "현장의 기대에 실천으로 답하겠습니다.",
+  "youtubeUrl": "https://www.youtube.com/@경기도본부2번에도",
   "telegramUrl": "https://t.me/+FriTf8gd-TwwYjA1",
   "candidates": [
     {
@@ -32,7 +33,7 @@
     }
   ],
   "news": [],
-  "videoUrl": "https://www.youtube.com/@경기도본부2번에도",
+  "videoUrl": "",
   "promises": [
     {
       "tag": "더 가까이",
@@ -86,5 +87,6 @@
     }
   ],
   "contactEmail": "",
+  "instagramUrl": "https://www.instagram.com/v2v_jin_lee_baek_2?psln=M2E1amFzMjBidjd5&utm_source=qr",
   "retentionPeriod": "선거 종료 후 30일 이내 파기(운영 확정 후 수정)"
 }
