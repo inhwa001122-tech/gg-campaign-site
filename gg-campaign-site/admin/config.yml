@@ -49,6 +49,8 @@ collections:
           - {label: 홍보영상 링크, name: videoUrl, widget: string, required: false}
           - {label: 텔레그램 링크, name: telegramUrl, widget: string, required: false}
           - {label: 페이스북 링크, name: facebookUrl, widget: string, required: false}
+          - {label: 인스타그램 링크, name: instagramUrl, widget: string, required: false}
+          - {label: 유튜브 채널 링크, name: youtubeUrl, widget: string, required: false}
           - {label: 개인정보 처리 주체, name: privacyController, widget: string, required: false}
           - {label: 개인정보 담당 문의 이메일, name: contactEmail, widget: string, required: false}
           - {label: 의견 보관 및 파기 기간, name: retentionPeriod, widget: string}
