@@ -28,13 +28,13 @@
   function wrapMobileDetails(){
     document.querySelectorAll('#candidateGrid .candidate-info').forEach(info=>{
       const target=info.querySelector('.career');if(!target||target.closest('details'))return;
-      const detail=document.createElement('details');detail.className='mobile-details';
+      const detail=document.createElement('details');detail.className='mobile-details';detail.open=window.innerWidth>700;
       const summary=document.createElement('summary');summary.textContent='주요 약력 보기';detail.append(summary);
       target.parentNode.insertBefore(detail,target);detail.append(target);
     });
     document.querySelectorAll('#pledgeGrid .pledge-card').forEach(card=>{
       const target=card.querySelector('p');if(!target||target.closest('details'))return;
-      const detail=document.createElement('details');detail.className='mobile-details';
+      const detail=document.createElement('details');detail.className='mobile-details';detail.open=window.innerWidth>700;
       const summary=document.createElement('summary');summary.textContent='공약 자세히 보기';detail.append(summary);
       target.parentNode.insertBefore(detail,target);detail.append(target);
     });
