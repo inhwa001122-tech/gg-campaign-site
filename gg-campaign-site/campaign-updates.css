@@ -1,0 +1,17 @@
+/* 선거운동본부 추가 디자인: 기존 styles.css 유지 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+body,button,input,textarea,select{font-family:Pretendard,'Apple SD Gothic Neo','Malgun Gothic',sans-serif}
+.hero-slogan-title{margin:14px 0 20px!important;line-height:1!important;letter-spacing:normal!important;max-width:610px}
+.hero-slogan-art{width:100%;height:auto;display:block;object-fit:contain;filter:none}
+.sns-quick{background:white;padding:34px 0 16px}
+.sns-quick .sns-wrap{border:1px solid #e5e9ef;background:#f8f9fb;padding:24px 28px;border-radius:12px}
+.sns-heading{font-size:13px;font-weight:800;color:#15243b;margin:0 0 14px}
+.sns-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.sns-item{display:flex;align-items:center;justify-content:center;gap:12px;min-height:66px;background:#fff;border:1px solid #e4e7ec;border-radius:9px;padding:10px;text-align:center;font-weight:800;font-size:14px}
+.sns-item .sns-symbol{display:grid;place-items:center;background:#f0f2f6;color:#c9252d;width:38px;height:38px;border-radius:9px;font-weight:900;font-size:17px;flex-shrink:0}
+.sns-item .sns-title{display:block}.sns-item .sns-pending{display:block;color:#8a929d;font-size:11px;font-weight:500}
+a.sns-item:hover{border-color:#c9252d;box-shadow:0 5px 16px #15243b12}
+.sns-item.is-pending{opacity:.76;cursor:default}
+.mobile-details{display:contents}.mobile-details summary{display:none}
+@media(max-width:800px){.hero-slogan-title{width:min(100%,600px);margin:15px 0 22px!important}.sns-quick{padding:16px 0 0}.sns-quick .sns-wrap{padding:16px}.sns-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.sns-item{gap:5px;flex-direction:column;min-height:78px;font-size:11px;padding:7px 2px}.sns-item .sns-symbol{width:30px;height:30px;font-size:15px}.sns-item .sns-pending{font-size:10px}}
+@media(max-width:700px){.mobile-details{display:block;margin-top:13px;border-top:1px solid #e5e8ed;padding-top:8px}.mobile-details summary{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;font-size:13px;font-weight:750;color:#bd2530;list-style:none;padding:9px 1px}.mobile-details summary::-webkit-details-marker{display:none}.mobile-details summary::after{content:'⌄';font-size:18px;line-height:1}.mobile-details[open] summary::after{content:'⌃'}.mobile-details .career,.mobile-details p{margin:4px 0 10px;border-top:0;padding-top:6px}.pledge-card{padding:24px}.pledge-card .mobile-details{margin-top:6px}.pledge-card h3{margin-bottom:8px}}
