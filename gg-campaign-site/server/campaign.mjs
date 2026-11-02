@@ -37,7 +37,7 @@ function seedContent(seed) {
       id: `legacy-${createHash('sha256').update(JSON.stringify(n)).digest('hex').slice(0, 24)}`,
       title: n.title, date: n.date, content: n.content || '',
       images: n.image && localImage(n.image) ? [n.image] : []
-    })), shorts: [], videoUrl: youtubeId(seed.videoUrl) ? youtubeUrl(youtubeId(seed.videoUrl)) : ''
+    })), shorts: [], videos: [], sectorPolicies: [], videoUrl: youtubeId(seed.videoUrl) ? youtubeUrl(youtubeId(seed.videoUrl)) : ''
   };
 }
 function validDate(value) {
@@ -105,10 +105,13 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
         if (!existing || !before || before !== after) fail('목록이 변경되었습니다. 새로고침한 뒤 다시 시도해 주세요.', 409);
         existing.etag = after;
       }
-      const data = existing ? existing.data : seedContent(seed);
+      const stored = existing ? existing.data : seedContent(seed);
       const revision = existing?.etag || 'initial';
-      // A corrupt/unknown schema must never silently reset published data.
-      if (!data || !Array.isArray(data.news) || !Array.isArray(data.shorts) || typeof data.videoUrl !== 'string') throw Error('Stored content schema');
+      // Backwards-compatible schema extension: do not overwrite an existing production store.
+      if (!stored || !Array.isArray(stored.news) || !Array.isArray(stored.shorts) || typeof stored.videoUrl !== 'string' ||
+        (stored.videos !== undefined && !Array.isArray(stored.videos)) ||
+        (stored.sectorPolicies !== undefined && !Array.isArray(stored.sectorPolicies))) throw Error('Stored content schema');
+      const data = { ...stored, videos: stored.videos || [], sectorPolicies: stored.sectorPolicies || [] };
       if (!writing) return json({ ...data, revision });
       if (!(request.headers.get('content-type') || '').startsWith('application/json')) fail('JSON 요청이 필요합니다.', 415);
       let input;
@@ -117,7 +120,7 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
       if (!input || typeof input !== 'object' || Array.isArray(input)) fail('올바른 요청이 아닙니다.');
       if (input.revision !== revision) fail('다른 관리자가 변경했습니다. 새로고침한 뒤 다시 저장해 주세요.', 409);
       const kind = input.kind;
-      if (!['news', 'shorts', 'video'].includes(kind)) fail('지원하지 않는 항목입니다.');
+      if (!['news', 'shorts', 'video', 'videos', 'sectorPolicies'].includes(kind)) fail('지원하지 않는 항목입니다.');
       if (kind === 'video') {
         if (request.method !== 'PATCH') fail('지원하지 않는 요청입니다.', 405);
         const id = input.url === '' ? '' : youtubeId(input.url);
@@ -128,7 +131,7 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
         if (request.method !== 'POST' && index === -1) fail('항목을 찾을 수 없습니다. 새로고침해 주세요.', 404);
         if (request.method === 'DELETE') list.splice(index, 1);
         else {
-          if (request.method === 'POST' && list.length >= (kind === 'news' ? 200 : 100)) fail('등록 한도에 도달했습니다. 오래된 항목을 정리해 주세요.');
+          if (request.method === 'POST' && list.length >= (kind === 'news' ? 200 : kind === 'sectorPolicies' ? 400 : 100)) fail('등록 한도에 도달했습니다. 오래된 항목을 정리해 주세요.');
           const item = { id: request.method === 'POST' ? randomUUID() : list[index].id, title: text(input.title, 120) };
           if (kind === 'news') {
             item.date = validDate(input.date); item.content = text(input.content, 6000);
@@ -140,8 +143,21 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
               if (!match || !uuid.test(match[1]) || !await media().getMetadata(`photos/${match[1]}`)) fail('업로드한 사진을 찾을 수 없습니다. 다시 업로드해 주세요.');
             }
             item.images = [...new Set(input.images)];
+          } else if (kind === 'sectorPolicies') {
+            item.union = text(input.union, 80);
+            item.field = input.field === '' || input.field === undefined ? '' : text(input.field, 80);
+            item.content = text(input.content, 6000);
+            if (typeof input.published !== 'boolean') fail('공개 여부를 확인해 주세요.');
+            item.published = input.published;
+            // Only a transition from draft to published starts the 72-hour NEW period.
+            // Editing an already published item never renews its badge.
+            const old = index < 0 ? null : list[index];
+            item.publishedAt = item.published ?
+              (old?.published && old.publishedAt ? old.publishedAt : new Date().toISOString()) :
+              (old?.publishedAt || null);
           } else {
-            const id = youtubeId(input.url); if (!id) fail('유튜브 쇼츠 영상 주소를 확인해 주세요.');
+            const id = youtubeId(input.url);
+            if (!id) fail('유튜브 개별 영상 주소를 확인해 주세요.');
             item.url = youtubeUrl(id);
           }
           if (request.method === 'POST') list.push(item); else list[index] = item;
