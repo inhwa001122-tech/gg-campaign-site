@@ -15,6 +15,69 @@ function frame(id, title) {
   node.allow = 'accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen';
   node.allowFullscreen = true; return node;
 }
+
+function renderSectors() {
+  const items = (state.sectorPolicies || []).filter(p => p.published === true);
+  const section = $('sectorPolicies'), nav = $('sectorNav'), grid = $('sectorGrid');
+  section.hidden = nav.hidden = items.length === 0;
+  grid.replaceChildren();
+  if (!items.length) return;
+  const groups = new Map();
+  for (const item of items.slice().reverse()) {
+    if (!groups.has(item.union)) groups.set(item.union, new Map());
+    const fields = groups.get(item.union), field = item.field || '산별 공통';
+    if (!fields.has(field)) fields.set(field, []);
+    fields.get(field).push(item);
+  }
+  const now = Date.now();
+  for (const [union, fields] of groups) {
+    const group = el('details', undefined, 'sector-card'), summary = el('summary');
+    const count = [...fields.values()].reduce((total, policies) => total + policies.length, 0);
+    summary.append(el('span', union, 'sector-card-name'), el('span', `${fields.size}개 분야 · 공약 ${count}건 ＋`, 'sector-card-meta'));
+    group.append(summary);
+    const body = el('div', undefined, 'sector-card-body');
+    for (const [field, policies] of fields) {
+      const detail = el('details', undefined, 'sector-field'), head = el('summary', field);
+      detail.append(head);
+      for (const policy of policies) {
+        const article = el('article', undefined, 'sector-policy'), title = el('h4', policy.title);
+        const published = Date.parse(policy.publishedAt || '');
+        if (Number.isFinite(published) && now >= published && now - published < 72 * 60 * 60 * 1000) {
+          title.append(el('span', 'NEW', 'sector-new'));
+        }
+        article.append(title, el('p', policy.content)); detail.append(article);
+      }
+      body.append(detail);
+    }
+    group.append(body); grid.append(group);
+  }
+}
+function renderLandscapeVideos() {
+  const list = (state.videos || []).filter(v => youtubeId(v.url));
+  const collection = $('landscapeCollection'), grid = $('landscapeGrid');
+  const hasOriginal = !!youtubeId(state.videoUrl);
+  const featured = youtubeId(state.videoUrl) || youtubeId(list[0]?.url);
+  const art = $('candidateVideo');
+  art.classList.toggle('has-video', !!featured);
+  if (featured) art.replaceChildren(frame(featured, hasOriginal ? '기호 2번 대표 홍보영상' : list[0].title));
+  else art.replaceChildren(el('span', '▶', 'play-ring'), el('span', 'WE MOVE TOGETHER'));
+  const extras = hasOriginal ? list : list.slice(1);
+  grid.replaceChildren();
+  for (const item of extras) {
+    const card = el('article', undefined, 'landscape-card'), video = frame(youtubeId(item.url), item.title);
+    const link = el('a', '유튜브에서 보기 ↗');
+    link.href = item.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+    card.append(video, el('h4', item.title), link); grid.append(card);
+  }
+  collection.hidden = grid.children.length === 0;
+  $('videoPending').hidden = !!featured;
+  $('videoLink').style.display = featured ? 'inline-flex' : 'none';
+  if (featured) {
+    $('videoLink').href = '#candidateVideo';
+    $('videoLink').removeAttribute('target');
+    $('videoLink').textContent = '홍보영상 보기 ↓';
+  }
+}
 function renderPublic() {
   window.updateCampaignNews(state.news);
   const grid = $('shortsGrid'); grid.replaceChildren();
@@ -26,13 +89,8 @@ function renderPublic() {
     card.append(link); grid.append(card);
   }
   if (!grid.children.length) grid.append(el('p', '쇼츠 공개를 준비하고 있습니다.', 'empty-state'));
-  const id = youtubeId(state.videoUrl), art = $('candidateVideo');
-  art.classList.toggle('has-video', !!id);
-  if (id) art.replaceChildren(frame(id, '기호 2번 후보 홍보영상'));
-  else art.replaceChildren(el('span', '▶', 'play-ring'), el('span', 'WE MOVE TOGETHER'));
-  $('videoPending').hidden = !!id;
-  $('videoLink').style.display = id ? 'inline-flex' : 'none';
-  if (id) { $('videoLink').href = '#candidateVideo'; $('videoLink').removeAttribute('target'); $('videoLink').textContent = '후보영상 보기 ↓'; }
+  renderSectors();
+  renderLandscapeVideos();
 }
 async function api(method = 'GET', body, query = '') {
   const headers = { Accept: 'application/json' };
@@ -56,9 +114,11 @@ function resetNews() {
   renderPhotos();
 }
 function resetShort() { $('shortEditor').reset(); $('shortId').value = ''; }
+function resetLandscape() { $('landscapeVideoEditor').reset(); $('landscapeVideoId').value = ''; }
+function resetSector() { $('sectorPolicyEditor').reset(); $('sectorPolicyId').value = ''; $('sectorPolicyPublished').checked = true; }
 function logout(announce = true) {
   token = ''; $('contentManager').hidden = true; $('contentLoginForm').hidden = false; $('contentPassword').value = '';
-  resetNews(); resetShort(); if (announce) status('로그아웃했습니다.');
+  resetNews(); resetShort(); resetLandscape(); resetSector(); if (announce) status('로그아웃했습니다.');
 }
 function renderPhotos() {
   const holder = $('photoSelection'); holder.replaceChildren();
@@ -74,11 +134,28 @@ function editNews(item) {
   selection = item.images.map(url => ({ url, preview: url })); renderPhotos(); $('newsTitle').focus();
 }
 function editShort(item) { $('shortId').value = item.id; $('shortTitle').value = item.title; $('shortUrl').value = item.url; $('shortTitle').focus(); }
+function editLandscape(item) {
+  resetLandscape(); $('landscapeVideoId').value = item.id;
+  $('landscapeVideoTitle').value = item.title; $('landscapeVideoUrl').value = item.url;
+  $('landscapeVideoTitle').focus();
+}
+function editSector(item) {
+  resetSector(); $('sectorPolicyId').value = item.id;
+  $('sectorUnion').value = item.union; $('sectorField').value = item.field;
+  $('sectorPolicyTitle').value = item.title; $('sectorPolicyBody').value = item.content;
+  $('sectorPolicyPublished').checked = item.published; $('sectorPolicyTitle').focus();
+}
 function renderLists() {
-  for (const [kind, target, edit] of [['news', 'newsManageList', editNews], ['shorts', 'shortManageList', editShort]]) {
+  const unions = [...new Set((state.sectorPolicies || []).map(p => p.union))].sort((a, b) => a.localeCompare(b, 'ko'));
+  const fields = [...new Set((state.sectorPolicies || []).map(p => p.field).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
+  $('knownUnions').replaceChildren(...unions.map(name => { const o = el('option'); o.value = name; return o; }));
+  $('knownFields').replaceChildren(...fields.map(name => { const o = el('option'); o.value = name; return o; }));
+  for (const [kind, target, edit] of [['news', 'newsManageList', editNews], ['shorts', 'shortManageList', editShort], ['videos', 'landscapeVideoManageList', editLandscape], ['sectorPolicies', 'sectorPolicyManageList', editSector]]) {
     const list = $(target); list.replaceChildren();
     for (const item of state[kind]) {
-      const row = el('li'); row.append(el('span', (item.date ? item.date + ' · ' : '') + item.title));
+      const row = el('li'); row.append(el('span', kind === 'sectorPolicies' ?
+        `${item.published ? '공개' : '임시저장'} · ${item.union} / ${item.field || '산별 공통'} · ${item.title}` :
+        (item.date ? item.date + ' · ' : '') + item.title));
       const change = el('button', '수정'), remove = el('button', '삭제', 'danger');
       change.type = remove.type = 'button'; change.disabled = remove.disabled = busy;
       change.onclick = () => edit(item);
@@ -87,6 +164,8 @@ function renderLists() {
         apply(await api('DELETE', { kind, id: item.id, revision: state.revision }));
         if (kind === 'news' && $('newsId').value === item.id) resetNews();
         if (kind === 'shorts' && $('shortId').value === item.id) resetShort();
+        if (kind === 'videos' && $('landscapeVideoId').value === item.id) resetLandscape();
+        if (kind === 'sectorPolicies' && $('sectorPolicyId').value === item.id) resetSector();
         status('삭제했습니다. 홈페이지에 바로 반영되었습니다.');
       });
       row.append(change, remove); list.append(row);
@@ -125,13 +204,14 @@ $('contentLoginForm').onsubmit = event => {
     token = candidate;
     try {
       await reload(true); $('contentPassword').value = ''; $('contentLoginForm').hidden = true; $('contentManager').hidden = false;
-      $('candidateVideoUrl').value = state.videoUrl; resetNews(); resetShort(); status('관리자 로그인 완료. 사진과 영상을 관리할 수 있습니다.');
+      $('candidateVideoUrl').value = state.videoUrl; resetNews(); resetShort(); resetLandscape(); resetSector(); status('관리자 로그인 완료. 산별 공약과 사진·영상을 관리할 수 있습니다.');
     } catch (error) { token = ''; throw error; }
   });
 };
 $('contentLogout').onclick = () => logout();
 $('contentReload').onclick = () => run(async () => { await reload(true); status('최신 목록을 불러왔습니다. 입력 중인 내용은 유지했습니다.'); });
 $('newsReset').onclick = resetNews; $('shortReset').onclick = resetShort;
+$('landscapeVideoReset').onclick = resetLandscape; $('sectorPolicyReset').onclick = resetSector;
 $('newsPhotos').onchange = () => {
   const files = [...$('newsPhotos').files];
   run(async () => {
@@ -167,11 +247,34 @@ $('videoEditor').onsubmit = event => {
     apply(await api('PATCH', { kind: 'video', url, revision: state.revision })); status('후보영상 설정을 저장했습니다.');
   });
 };
+$('landscapeVideoEditor').onsubmit = event => {
+  event.preventDefault(); run(async () => {
+    const id = $('landscapeVideoId').value;
+    if (!youtubeId($('landscapeVideoUrl').value)) throw Error('개별 유튜브 영상 주소를 확인해 주세요.');
+    apply(await api(id ? 'PATCH' : 'POST', {
+      kind: 'videos', id, title: $('landscapeVideoTitle').value,
+      url: $('landscapeVideoUrl').value, revision: state.revision
+    }));
+    resetLandscape(); status('가로영상을 등록했습니다. 홈페이지에 바로 반영되었습니다.');
+  });
+};
+$('sectorPolicyEditor').onsubmit = event => {
+  event.preventDefault(); run(async () => {
+    const id = $('sectorPolicyId').value;
+    apply(await api(id ? 'PATCH' : 'POST', {
+      kind: 'sectorPolicies', id,
+      union: $('sectorUnion').value, field: $('sectorField').value,
+      title: $('sectorPolicyTitle').value, content: $('sectorPolicyBody').value,
+      published: $('sectorPolicyPublished').checked, revision: state.revision
+    }));
+    resetSector(); status('산별 공약을 저장했습니다. 공개로 설정한 공약만 홈페이지에 표시됩니다.');
+  });
+};
 const site = await window.campaignSiteReady;
 try { await reload(); }
 catch {
   // Keep existing deployed content visible during a storage outage; never write a reset.
-  state = { news: (site?.news || []).map((n, i) => ({ ...n, id: `fallback-${i}`, images: n.image ? [n.image] : [] })), shorts: [], videoUrl: site?.videoUrl || '' };
+  state = { news: (site?.news || []).map((n, i) => ({ ...n, id: `fallback-${i}`, images: n.image ? [n.image] : [] })), shorts: [], videos: [], sectorPolicies: [], videoUrl: site?.videoUrl || '' };
   renderPublic(); status('실시간 소식을 불러오지 못했습니다. 기존 소식을 표시합니다. 잠시 후 새로고침해 주세요.', true);
 }
 // Visitors see changes without redeployment; don't interrupt an administrator's edits.
