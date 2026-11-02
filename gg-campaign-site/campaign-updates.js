@@ -3,7 +3,8 @@
   const channels=[['instagramUrl','인스타그램','◎','instagram'],['facebookUrl','페이스북','f','facebook'],['telegramUrl','텔레그램','➤','telegram'],['youtubeUrl','유튜브','▶','youtube']];
   function rearrange(){
     const voice=document.getElementById('voice'),pledges=document.getElementById('pledges');
-    if(voice && pledges && voice.previousElementSibling!==pledges)pledges.insertAdjacentElement('afterend',voice);
+    const sector=document.getElementById('sectorPolicies'),anchor=sector||pledges;
+    if(voice && anchor && voice.previousElementSibling!==anchor)anchor.insertAdjacentElement('afterend',voice);
     const candidates=document.getElementById('candidates');
     if(candidates && !document.getElementById('snsQuick')){
       const sec=document.createElement('section');sec.id='snsQuick';sec.className='sns-quick';sec.setAttribute('aria-label','SNS 소통채널');
