@@ -116,3 +116,60 @@ test('storage failure and corrupt content never silently reset the store', async
   const handler = createCampaignHandler({ getStore: () => ({ getWithMetadata: async () => ({ data: {} }) }) });
   assert.equal((await handler(new Request('http://localhost/'))).status, 503);
 });
+
+test('existing production content without the new fields remains compatible', async () => {
+  const { request } = fixture();
+  const old = await request('POST', news);
+  assert.equal(old.status, 201);
+  const r = await request('GET', null, { auth: false });
+  assert.deepEqual(r.body.sectorPolicies, []);
+  assert.deepEqual(r.body.videos, []);
+  assert.equal(r.body.news.length, 1);
+  const first = await request('POST', { kind: 'sectorPolicies', union: '공공운수노조', field: '택시', title: '일한 만큼 월급', content: '공약 내용', published: true, revision: r.body.revision });
+  assert.equal(first.status, 201);
+  assert.equal(first.body.news.length, 1);
+  assert.ok(first.body.sectorPolicies[0].publishedAt);
+});
+
+test('sector policy draft publishing timestamps and edits are stable', async () => {
+  const { request } = fixture();
+  const draft = await request('POST', { kind: 'sectorPolicies', union: '공공운수노조', field: '화물', title: '화물 공약', content: '첫 내용', published: false, revision: 'initial' });
+  assert.equal(draft.status, 201);
+  assert.equal(draft.body.sectorPolicies[0].publishedAt, null);
+  const item = draft.body.sectorPolicies[0];
+  const published = await request('PATCH', { kind: 'sectorPolicies', id: item.id, union: item.union, field: item.field, title: item.title, content: item.content, published: true, revision: draft.body.revision });
+  const date = published.body.sectorPolicies[0].publishedAt;
+  assert.ok(Date.parse(date) > Date.now() - 60_000);
+  const edited = await request('PATCH', { kind: 'sectorPolicies', id: item.id, union: item.union, field: item.field, title: '문구 교체', content: '수정', published: true, revision: published.body.revision });
+  assert.equal(edited.body.sectorPolicies[0].publishedAt, date);
+  const hidden = await request('PATCH', { kind: 'sectorPolicies', id: item.id, union: item.union, field: item.field, title: '문구 교체', content: '수정', published: false, revision: edited.body.revision });
+  assert.equal(hidden.body.sectorPolicies[0].published, false);
+  const removed = await request('DELETE', { kind: 'sectorPolicies', id: item.id, revision: hidden.body.revision });
+  assert.equal(removed.body.sectorPolicies.length, 0);
+});
+
+test('sector policy and landscape video validate inputs and require authorization', async () => {
+  const { request } = fixture();
+  const base = { kind: 'sectorPolicies', union: '금속노조', field: '', title: '공약', content: '공약 내용', published: true, revision: 'initial' };
+  for (const patch of [{ union: '' }, { title: '<'.repeat(121) }, { content: '' }, { published: 'true' }, { field: '나'.repeat(81) }]) {
+    assert.equal((await request('POST', { ...base, ...patch })).status, 400);
+  }
+  assert.equal((await request('POST', base, { auth: false })).status, 401);
+  assert.equal((await request('POST', { kind: 'videos', title: '영상', url: 'https://youtube.com/@channel', revision: 'initial' })).status, 400);
+  assert.equal((await request('POST', { kind: 'videos', title: '영상', url: 'https://youtu.be/abcdefghijk', revision: 'initial' }, { auth: false })).status, 401);
+});
+
+test('multiple landscape videos preserve the single existing representative video', async () => {
+  const { request } = fixture();
+  const original = await request('PATCH', { kind: 'video', url: 'https://youtu.be/abcdefghijk', revision: 'initial' });
+  const v1 = await request('POST', { kind: 'videos', title: '첫 번째 가로영상', url: 'https://youtu.be/12345678901', revision: original.body.revision });
+  assert.equal(v1.status, 201);
+  const v2 = await request('POST', { kind: 'videos', title: '두 번째 가로영상', url: 'https://www.youtube.com/watch?v=ABCDEFGHIJK', revision: v1.body.revision });
+  assert.equal(v2.body.videoUrl, 'https://www.youtube.com/watch?v=abcdefghijk');
+  assert.equal(v2.body.videos.length, 2);
+  const change = await request('PATCH', { kind: 'videos', id: v2.body.videos[0].id, title: '수정된 제목', url: 'https://youtu.be/12345678901', revision: v2.body.revision });
+  assert.equal(change.body.videos[0].title, '수정된 제목');
+  const del = await request('DELETE', { kind: 'videos', id: change.body.videos[0].id, revision: change.body.revision });
+  assert.equal(del.body.videos.length, 1);
+  assert.equal(del.body.videoUrl, v2.body.videoUrl);
+});
