@@ -1,0 +1,23 @@
+name: Verify campaign website
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check browser and server JavaScript syntax
+        run: |
+          node --check gg-campaign-site/live-content.js
+          node --check gg-campaign-site/campaign-updates.js
+          node --check gg-campaign-site/server/campaign.mjs
+      - name: Run backend regression tests
+        run: node --test tests/campaign.test.mjs
