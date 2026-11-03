@@ -114,3 +114,13 @@ test('IT, civil service and healthcare supplied web posters are all linked to th
     assert.ok(landing.includes('src="images/' + image + '"'));
   }
 });
+
+test('Telegram buttons use the current channel invite link everywhere', () => {
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const script = readFileSync(new URL('../gg-campaign-site/script.js', import.meta.url), 'utf8');
+  const updates = readFileSync(new URL('../gg-campaign-site/campaign-updates.js', import.meta.url), 'utf8');
+  assert.equal(seed.telegramUrl, 'https://t.me/+ortairYydR5hMmY1');
+  assert.notEqual(seed.telegramUrl, 'https://t.me/+FriTf8gd-TwwYjA1');
+  assert.match(script, /\['telegramUrl','telegram'\]/);
+  assert.match(updates, /\['telegramUrl','텔레그램'/);
+});
