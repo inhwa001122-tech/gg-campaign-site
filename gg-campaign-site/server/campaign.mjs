@@ -122,8 +122,18 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
         !upgradingConstruction || !oldConstructionIds.includes(id));
       const sectorPolicies = (stored.sectorPolicies || []).filter(item =>
         !upgradingConstruction || item.id !== oldConstructionIds[3]).map(item => ({ ...item }));
+      const olderWorkerPosters = {
+        '/images/it-worker-poster.webp': '/images/it-worker-telegram-v2.webp',
+        '/images/civilservice-worker-poster.webp': '/images/civilservice-worker-telegram-v2.webp',
+        '/images/healthcare-worker-poster.webp': '/images/healthcare-worker-telegram-v2.webp'
+      };
       for (const item of (Array.isArray(seed.sectorPolicies) ? seed.sectorPolicies : [])) {
         const saved = sectorPolicies.find(p => p.id === item.id);
+        if (saved && olderWorkerPosters[saved.poster] === item.poster) {
+          // Replace only this specific prior upload; do not override a poster
+          // customized or explicitly removed by a site administrator.
+          saved.poster = item.poster;
+        }
         if (saved && upgradingConstruction && oldConstructionIds.includes(item.id)) {
           Object.assign(saved, item, {
             publishedAt: saved.publishedAt || item.publishedAt,
