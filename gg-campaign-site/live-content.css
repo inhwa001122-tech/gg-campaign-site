@@ -44,3 +44,37 @@
 #construction-policy{scroll-margin-top:115px}
 .sector-intro{margin:4px 0 10px;padding:11px 13px;border-radius:6px;background:#f6f8f9;color:#1f2f46;font-size:15px;font-weight:850}
 @media(max-width:800px){#construction-policy{scroll-margin-top:85px}}
+
+/* Sector web posters: use the original images as clickable pledge entry points. */
+.sector-card.has-poster{grid-column:span 2}
+.sector-card.has-poster>summary{justify-content:flex-start;gap:22px}
+.sector-poster-thumb{width:96px;height:132px;flex:none;object-fit:cover;object-position:top center;border-radius:5px;border:1px solid #e1e6e8;background:#eef0f2;box-shadow:0 4px 13px #1e2b3920}
+.sector-summary-info{display:flex;flex-direction:column;gap:7px;min-width:0;flex:1}
+.sector-summary-headline{font-size:15px;font-weight:700;color:#546272}
+.sector-card.has-poster>summary:hover{background:#f9fafb}
+.sector-card.has-poster .sector-card-body{display:grid;grid-template-columns:minmax(180px,250px) minmax(0,1fr);align-items:start;gap:28px}
+.sector-poster-sidebar{min-width:0}
+.sector-poster-expand{display:block;max-width:250px}
+.sector-poster-expand img{display:block;width:100%;height:auto;max-height:450px;object-fit:contain;object-position:top;border-radius:7px;border:1px solid #e1e5e8;background:#f5f5f5}
+.sector-poster-caption{color:#5d6b79;margin:7px 0 10px;font-size:12px}
+.sector-poster-share{background:#c9252d;color:#fff;border:0;border-radius:4px;padding:10px 13px;font-weight:750;font-size:12px;max-width:100%;overflow-wrap:anywhere}
+.sector-poster-share:hover{background:#ad1d28}
+.sector-fields-wrap{min-width:0}
+.sector-poster-preview{display:flex;align-items:center;gap:16px;margin:12px 0}
+.sector-poster-preview img{display:block;width:100px;max-height:185px;object-fit:contain;object-position:top;border:1px solid #d7dce2;border-radius:4px;background:#f6f7f9}
+.sector-poster-preview span{font-size:12px;color:#5e6e80}
+.content-admin #sectorPosterRemove{color:#b52330;border-color:#edbcc0}
+@media(max-width:800px){
+ .sector-card.has-poster{grid-column:span 1}
+ .sector-card.has-poster .sector-card-body{grid-template-columns:1fr;gap:15px}
+ .sector-poster-sidebar{display:flex;flex-direction:column;align-items:flex-start}
+ .sector-poster-expand{max-width:180px}
+ .sector-poster-expand img{max-height:265px}
+}
+@media(max-width:450px){
+ .sector-card.has-poster>summary{gap:14px}
+ .sector-poster-thumb{width:80px;height:112px}
+ .sector-summary-headline{font-size:13px}
+ .sector-card-name{font-size:17px}
+ .sector-card-meta{white-space:normal}
+}
