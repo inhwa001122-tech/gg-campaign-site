@@ -40,3 +40,7 @@
 .landscape-card a{display:inline-block;color:#576477;font-size:12px;padding:0 15px 15px}
 @media(max-width:800px){.sector-grid,.landscape-grid{grid-template-columns:1fr}.sector-editor-fields{grid-template-columns:1fr;gap:0}}
 @media(max-width:450px){.sector-card>summary{padding:18px 15px}.sector-card-name{font-size:17px}.sector-card-body{padding:12px 13px}}
+
+#construction-policy{scroll-margin-top:115px}
+.sector-intro{margin:4px 0 10px;padding:11px 13px;border-radius:6px;background:#f6f8f9;color:#1f2f46;font-size:15px;font-weight:850}
+@media(max-width:800px){#construction-policy{scroll-margin-top:85px}}
