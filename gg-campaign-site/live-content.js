@@ -65,6 +65,9 @@ function renderSectors() {
   const now = Date.now();
   for (const [union, fields] of groups) {
     const group = el('details', undefined, 'sector-card'), summary = el('summary');
+    if (['IT노동자', '공무원노동자', '보건의료노동자'].includes(union)) {
+      group.classList.add('worker-card-fullwidth');
+    }
     const allPolicies = [...fields.values()].flat();
     const count = allPolicies.length;
     const posterPolicy = allPolicies.find(policy => safePosterSrc(policy.poster));
