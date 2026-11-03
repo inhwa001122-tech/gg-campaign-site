@@ -46,7 +46,7 @@
 @media(max-width:800px){#construction-policy{scroll-margin-top:85px}}
 
 /* Sector web posters: use the original images as clickable pledge entry points. */
-.sector-card.has-poster{grid-column:span 2}
+.sector-card.has-poster,.sector-card.worker-card-fullwidth{grid-column:span 2}
 .sector-card.has-poster>summary{justify-content:flex-start;gap:22px}
 .sector-poster-thumb{width:96px;height:132px;flex:none;object-fit:contain;object-position:top center;border-radius:5px;border:1px solid #e1e6e8;background:#eef0f2;box-shadow:0 4px 13px #1e2b3920}
 .sector-summary-info{display:flex;flex-direction:column;gap:7px;min-width:0;flex:1}
@@ -61,7 +61,7 @@
 .sector-poster-preview span{font-size:12px;color:#5e6e80}
 .content-admin #sectorPosterRemove{color:#b52330;border-color:#edbcc0}
 @media(max-width:800px){
- .sector-card.has-poster{grid-column:span 1}
+ .sector-card.has-poster,.sector-card.worker-card-fullwidth{grid-column:span 1}
 }
 @media(max-width:450px){
  .sector-card.has-poster>summary{gap:14px}
