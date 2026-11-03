@@ -370,7 +370,7 @@ test('the revised construction policies preserve all fourteen detail lines verba
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
   const items = seed.sectorPolicies;
-  assert.deepEqual(items.map(x => x.content.split('\\n').length), [5, 5, 4]);
+  assert.deepEqual(items.map(x => x.content.split('\n').length), [5, 5, 4]);
   assert.equal(items[0].title, "'모범 발주자' 경기도의 역할 강제, 불법하도급·체불 근절");
   assert.equal(items[1].title, '경기도 조례 개정, 경기도 노정교섭 구축');
   assert.equal(items[2].title, '건설노동자 참여 & 안전망 구축');
