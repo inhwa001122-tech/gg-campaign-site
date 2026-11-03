@@ -192,9 +192,10 @@ test('unpublished sector drafts stay private in public API but visible to admins
 test('construction seed publishes three revised policies even with pre-existing Netlify data', async () => {
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
-  assert.equal(seed.sectorPolicies.length, 3);
-  assert.deepEqual(seed.sectorPolicies.map(p => p.order), [1, 2, 3]);
-  assert.ok(seed.sectorPolicies.every(p => p.published && p.union === '건설노동자' && p.field === '건설노조'));
+  assert.equal(seed.sectorPolicies.length, 6);
+  assert.deepEqual(seed.sectorPolicies.filter(p => p.union === '건설노동자').map(p => p.order), [1, 2, 3]);
+  assert.ok(seed.sectorPolicies.every(p => p.published));
+  assert.equal(seed.sectorPolicies.filter(p => p.union === '건설노동자' && p.field === '건설노조').length, 3);
   const f = fixture(seed);
   f.stores.set(CONTENT_STORE, new Map([['published', {
     data: { news: [{ id: 'news-1', title: '기존 소식', date: '2026-10-30', content: '보존', images: [] }],
@@ -207,15 +208,15 @@ test('construction seed publishes three revised policies even with pre-existing 
   assert.equal(read.body.news[0].title, '기존 소식');
   assert.equal(read.body.shorts.length, 1);
   assert.equal(read.body.videoUrl, 'https://www.youtube.com/watch?v=abcdefghijk');
-  assert.equal(read.body.sectorPolicies.length, 3);
+  assert.equal(read.body.sectorPolicies.length, 6);
   const admin = await f.request('GET', null, { query: '?admin=1' });
-  assert.equal(admin.body.sectorPolicies.length, 3);
+  assert.equal(admin.body.sectorPolicies.length, 6);
   const target = admin.body.sectorPolicies.find(p => p.order === 1);
   const updated = await f.request('PATCH', { kind: 'sectorPolicies', id: target.id, union: target.union,
     field: target.field, title: '수정 테스트', content: target.content, published: true,
     revision: admin.body.revision });
   assert.equal(updated.status, 200);
-  assert.equal(updated.body.sectorPolicies.length, 3);
+  assert.equal(updated.body.sectorPolicies.length, 6);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).headline, target.headline);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).order, 1);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).publishedAt, target.publishedAt);
@@ -223,15 +224,33 @@ test('construction seed publishes three revised policies even with pre-existing 
   const deleted = await f.request('DELETE', { kind: 'sectorPolicies', id: target.id, revision: updated.body.revision });
   assert.equal(deleted.status, 200);
   const readAgain = await f.request('GET', null, { auth: false });
-  assert.equal(readAgain.body.sectorPolicies.length, 2);
+  assert.equal(readAgain.body.sectorPolicies.length, 5);
   assert.ok(!readAgain.body.sectorPolicies.some(p => p.id === target.id));
   assert.equal(readAgain.body.news.length, 1);
+});
+
+
+test('education worker seed adds three published, 72-hour NEW eligible policies without disturbing construction', async () => {
+  const { readFileSync } = await import('node:fs');
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const education = seed.sectorPolicies.filter(p => p.union === '교육노동자');
+  assert.equal(education.length, 3);
+  assert.deepEqual(education.map(p => p.order), [1, 2, 3]);
+  assert.ok(education.every(p => p.published && p.field === '교육' && p.headline === '교육노동자와 함께 만들겠습니다.'));
+  assert.ok(education.every(p => Number.isFinite(Date.parse(p.publishedAt))));
+  assert.match(education[0].content, /지방교육재정교부금 축소 반대/);
+  assert.match(education[1].content, /교원노조법 폐기/);
+  assert.match(education[2].content, /학교 AI 사용은 교육주체 토론과 합의로/);
+  const f = fixture(seed);
+  const read = await f.request('GET', null, { auth: false });
+  assert.equal(read.body.sectorPolicies.filter(p => p.union === '교육노동자').length, 3);
+  assert.equal(read.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
 });
 
 test('construction headline and three revised text blocks remain complete', async () => {
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
-  const items = seed.sectorPolicies;
+  const items = seed.sectorPolicies.filter(p => p.union === '건설노동자');
   assert.equal(items[0].headline, '건설노동자와 함께 만들겠습니다.');
   assert.match(items[0].content, /50억 미만 소규모 건설현장 '안전관리자 고용 기금' 조성/);
   assert.match(items[1].content, /경기도 유관 실·국과 건설노조 간 '직통 노정교섭' 지원/);
@@ -341,8 +360,8 @@ test('migrates four saved construction pledges to three without losing unrelated
   assert.equal(initial.body.constructionContentVersion, 2);
   const construction = initial.body.sectorPolicies.filter(p => p.union === '건설노동자');
   assert.equal(construction.length, 3);
-  assert.deepEqual(construction.map(p => p.title), seed.sectorPolicies.map(p => p.title));
-  assert.deepEqual(construction.map(p => p.content), seed.sectorPolicies.map(p => p.content));
+  assert.deepEqual(construction.map(p => p.title), seed.sectorPolicies.filter(p => p.union === '건설노동자').map(p => p.title));
+  assert.deepEqual(construction.map(p => p.content), seed.sectorPolicies.filter(p => p.union === '건설노동자').map(p => p.content));
   assert.equal(construction[0].poster, '/images/construction-poster.webp');
   assert.equal(construction[0].publishedAt, oldTime);
   assert.equal(initial.body.sectorPolicies.find(p => p.id === 'other-sector').title, '별도 공약');
@@ -369,7 +388,7 @@ test('migrates four saved construction pledges to three without losing unrelated
 test('the revised construction policies preserve all fourteen detail lines verbatim', async () => {
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
-  const items = seed.sectorPolicies;
+  const items = seed.sectorPolicies.filter(p => p.union === '건설노동자');
   assert.deepEqual(items.map(x => x.content.split('\n').length), [5, 5, 4]);
   assert.equal(items[0].title, "'모범 발주자' 경기도의 역할 강제, 불법하도급·체불 근절");
   assert.equal(items[1].title, '경기도 조례 개정, 경기도 노정교섭 구축');
