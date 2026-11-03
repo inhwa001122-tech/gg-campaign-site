@@ -3,6 +3,7 @@ import { MAX_PHOTOS, MAX_IMAGE_BYTES, youtubeId, embedUrl } from './campaign-sha
 const $ = id => document.getElementById(id);
 const endpoint = '/.netlify/functions/campaign';
 let token = '', state = null, selection = [], busy = false, constructionDeepLinkOpened = false;
+let sectorPosterSelection = null;
 const el = (tag, text, className) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; };
 function status(message, error = false) {
   $('contentAdminStatus').textContent = message;
@@ -16,6 +17,26 @@ function frame(id, title) {
   node.allowFullscreen = true; return node;
 }
 
+function safePosterSrc(value) {
+  if (typeof value !== 'string') return '';
+  if (/^\\/?images\\/[^?#]+$/u.test(value) && !value.split('/').includes('..')) return value;
+  if (/^\\/\\.netlify\\/functions\\/campaign\\?image=[a-f0-9-]{36}$/.test(value)) return value;
+  return '';
+}
+function sectorShareLink(union, poster) {
+  if (union === '건설산업연맹' && poster === '/images/construction-poster.webp') {
+    return location.origin + '/construction-poster.html';
+  }
+  return location.origin + '/#sectorPolicies';
+}
+async function copySectorLink(link, button) {
+  try {
+    await navigator.clipboard.writeText(link);
+    button.textContent = '링크 복사 완료';
+  } catch {
+    button.textContent = '복사가 안 됩니다. 아래 주소를 복사하세요: ' + link;
+  }
+}
 function renderSectors() {
   const items = (state.sectorPolicies || []).filter(p => p.published === true);
   const section = $('sectorPolicies'), nav = $('sectorNav'), grid = $('sectorGrid');
@@ -32,12 +53,40 @@ function renderSectors() {
   const now = Date.now();
   for (const [union, fields] of groups) {
     const group = el('details', undefined, 'sector-card'), summary = el('summary');
-    const count = [...fields.values()].reduce((total, policies) => total + policies.length, 0);
-    summary.append(el('span', union, 'sector-card-name'), el('span', `${fields.size}개 분야 · 공약 ${count}건 ＋`, 'sector-card-meta'));
+    const allPolicies = [...fields.values()].flat();
+    const count = allPolicies.length;
+    const posterPolicy = allPolicies.find(policy => safePosterSrc(policy.poster));
+    const poster = safePosterSrc(posterPolicy?.poster);
+    const headline = allPolicies.find(policy => policy.headline)?.headline;
+    if (poster) {
+      group.classList.add('has-poster');
+      const img = el('img', undefined, 'sector-poster-thumb');
+      img.src = poster; img.alt = `${union} 공약 웹자보 미리보기`; img.loading = 'lazy';
+      summary.append(img);
+    }
+    const info = el('span', undefined, 'sector-summary-info');
+    info.append(el('span', union, 'sector-card-name'));
+    if (headline) info.append(el('span', headline, 'sector-summary-headline'));
+    info.append(el('span', `${fields.size}개 분야 · 공약 ${count}건 · 클릭해서 보기 ＋`, 'sector-card-meta'));
+    summary.append(info);
     group.append(summary);
     const body = el('div', undefined, 'sector-card-body');
-    const headline = [...fields.values()].flat().find(policy => policy.headline)?.headline;
-    if (headline) body.append(el('p', headline, 'sector-intro'));
+    const details = el('div', undefined, 'sector-fields-wrap');
+    if (headline) details.append(el('p', headline, 'sector-intro'));
+    if (poster) {
+      const sidebar = el('div', undefined, 'sector-poster-sidebar');
+      const large = el('a', undefined, 'sector-poster-expand');
+      large.href = poster; large.target = '_blank'; large.rel = 'noopener noreferrer';
+      large.title = '웹자보 원본 이미지 확대 보기';
+      const img = el('img'); img.src = poster; img.alt = `${union} 공약 웹자보 전체 이미지`; img.loading = 'lazy';
+      large.append(img);
+      const caption = el('p', '웹자보 확대 보기 ↗', 'sector-poster-caption');
+      const share = el('button', '웹자보·공약 링크 복사', 'sector-poster-share');
+      share.type = 'button';
+      share.onclick = () => copySectorLink(sectorShareLink(union, poster), share);
+      sidebar.append(large, caption, share);
+      body.append(sidebar);
+    }
     const isConstruction = union === '건설산업연맹' && fields.has('건설노조');
     if (isConstruction) group.id = 'construction-policy';
     for (const [field, policies] of fields) {
@@ -55,8 +104,9 @@ function renderSectors() {
         }
         article.append(title, el('p', policy.content)); detail.append(article);
       }
-      body.append(detail);
+      details.append(detail);
     }
+    body.append(details);
     group.append(body); grid.append(group);
   }
   if (location.hash === '#construction-policy' && !constructionDeepLinkOpened) {
@@ -135,7 +185,23 @@ function resetNews() {
 }
 function resetShort() { $('shortEditor').reset(); $('shortId').value = ''; }
 function resetLandscape() { $('landscapeVideoEditor').reset(); $('landscapeVideoId').value = ''; }
-function resetSector() { $('sectorPolicyEditor').reset(); $('sectorPolicyId').value = ''; $('sectorPolicyPublished').checked = true; }
+function clearSectorPoster() {
+  if (sectorPosterSelection?.blob) URL.revokeObjectURL(sectorPosterSelection.preview);
+  sectorPosterSelection = null;
+}
+function renderSectorPosterPreview() {
+  const target = $('sectorPosterPreview'); target.replaceChildren();
+  if (sectorPosterSelection?.preview) {
+    const img = el('img'); img.src = sectorPosterSelection.preview; img.alt = '산별 웹자보 미리보기';
+    target.append(img, el('span', '공약 목록에 표시될 웹자보 이미지'));
+  }
+  $('sectorPosterRemove').hidden = !sectorPosterSelection?.preview;
+}
+function resetSector() {
+  clearSectorPoster();
+  $('sectorPolicyEditor').reset(); $('sectorPolicyId').value = '';
+  $('sectorPolicyPublished').checked = true; renderSectorPosterPreview();
+}
 function logout(announce = true) {
   token = ''; $('contentManager').hidden = true; $('contentLoginForm').hidden = false; $('contentPassword').value = '';
   resetNews(); resetShort(); resetLandscape(); resetSector(); if (announce) status('로그아웃했습니다.');
@@ -163,7 +229,10 @@ function editSector(item) {
   resetSector(); $('sectorPolicyId').value = item.id;
   $('sectorUnion').value = item.union; $('sectorField').value = item.field;
   $('sectorPolicyTitle').value = item.title; $('sectorPolicyBody').value = item.content;
-  $('sectorPolicyPublished').checked = item.published; $('sectorPolicyTitle').focus();
+  $('sectorPolicyPublished').checked = item.published;
+  const poster = safePosterSrc(item.poster);
+  sectorPosterSelection = poster ? { url: poster, preview: poster } : null;
+  renderSectorPosterPreview(); $('sectorPolicyTitle').focus();
 }
 function renderLists() {
   const unions = [...new Set((state.sectorPolicies || []).map(p => p.union))].sort((a, b) => a.localeCompare(b, 'ko'));
@@ -232,6 +301,19 @@ $('contentLogout').onclick = () => logout();
 $('contentReload').onclick = () => run(async () => { await reload(true); status('최신 목록을 불러왔습니다. 입력 중인 내용은 유지했습니다.'); });
 $('newsReset').onclick = resetNews; $('shortReset').onclick = resetShort;
 $('landscapeVideoReset').onclick = resetLandscape; $('sectorPolicyReset').onclick = resetSector;
+$('sectorPosterRemove').onclick = () => {
+  clearSectorPoster(); $('sectorPosterFile').value = '';
+  renderSectorPosterPreview(); status('웹자보 이미지를 제외했습니다. 공약 저장을 누르면 반영됩니다.');
+};
+$('sectorPosterFile').onchange = () => {
+  const file = $('sectorPosterFile').files[0];
+  if (!file) return;
+  run(async () => {
+    const image = await compress(file);
+    clearSectorPoster(); sectorPosterSelection = image;
+    renderSectorPosterPreview(); status('웹자보가 준비됐습니다. 공약 저장을 누르면 등록됩니다.');
+  }).finally(() => { $('sectorPosterFile').value = ''; });
+};
 $('newsPhotos').onchange = () => {
   const files = [...$('newsPhotos').files];
   run(async () => {
@@ -281,13 +363,18 @@ $('landscapeVideoEditor').onsubmit = event => {
 $('sectorPolicyEditor').onsubmit = event => {
   event.preventDefault(); run(async () => {
     const id = $('sectorPolicyId').value;
+    if (sectorPosterSelection?.blob && !sectorPosterSelection.url) {
+      status('웹자보 이미지를 업로드하고 있습니다…');
+      sectorPosterSelection.url = (await api('POST', sectorPosterSelection.blob, '?upload=1')).url;
+    }
     apply(await api(id ? 'PATCH' : 'POST', {
       kind: 'sectorPolicies', id,
       union: $('sectorUnion').value, field: $('sectorField').value,
       title: $('sectorPolicyTitle').value, content: $('sectorPolicyBody').value,
+      poster: sectorPosterSelection?.url || '',
       published: $('sectorPolicyPublished').checked, revision: state.revision
     }));
-    resetSector(); status('산별 공약을 저장했습니다. 공개로 설정한 공약만 홈페이지에 표시됩니다.');
+    resetSector(); status('산별 공약과 웹자보를 저장했습니다. 공개로 설정한 항목만 홈페이지에 표시됩니다.');
   });
 };
 const site = await window.campaignSiteReady;
