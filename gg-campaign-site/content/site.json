@@ -99,7 +99,8 @@
       "published": true,
       "publishedAt": "2026-11-03T00:00:00.000Z",
       "headline": "건설노동자와 함께 만들겠습니다.",
-      "order": 1
+      "order": 1,
+      "poster": "/images/construction-poster.webp"
     },
     {
       "id": "seed-construction-20261103-2",

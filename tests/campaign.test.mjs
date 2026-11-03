@@ -238,3 +238,50 @@ test('construction headline and four text blocks remain complete', async () => {
   assert.match(items[2].content, /공영주기장 설치를 위한 제도 마련 및 시행/);
   assert.match(items[3].content, /경기노동청 정례협의 확대/);
 });
+
+test('construction web poster appears on sector pledges even in preexisting production content', async () => {
+  const { readFileSync } = await import('node:fs');
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const construction = seed.sectorPolicies[0];
+  assert.equal(construction.poster, '/images/construction-poster.webp');
+  const f = fixture(seed);
+  const saved = structuredClone(seed.sectorPolicies);
+  delete saved[0].poster; // mirrors production data saved before web poster functionality
+  f.stores.set(CONTENT_STORE, new Map([['published', {
+    data: { news: [], shorts: [], videoUrl: '', videos: [], sectorPolicies: saved },
+    etag: 'earlier-version'
+  }]]));
+  const publicRead = await f.request('GET', null, { auth: false });
+  assert.equal(publicRead.body.sectorPolicies[0].poster, '/images/construction-poster.webp');
+  const edit = await f.request('PATCH', { kind: 'sectorPolicies', id: construction.id,
+    union: construction.union, field: construction.field, title: construction.title,
+    content: construction.content, published: true, revision: publicRead.body.revision });
+  assert.equal(edit.status, 200);
+  assert.equal(edit.body.sectorPolicies[0].poster, '/images/construction-poster.webp');
+  const remove = await f.request('PATCH', { kind: 'sectorPolicies', id: construction.id,
+    union: construction.union, field: construction.field, title: construction.title,
+    content: construction.content, poster: '', published: true, revision: edit.body.revision });
+  assert.equal(remove.status, 200);
+  const afterRemoval = await f.request('GET', null, { auth: false });
+  assert.equal(afterRemoval.body.sectorPolicies[0].poster, '');
+});
+
+test('sector poster uploads reuse protected WebP pipeline and disallow remote images', async () => {
+  const f = fixture();
+  const base = { kind: 'sectorPolicies', union: '공공운수노조', field: '택시', title: '공약',
+    content: '내용', published: true, revision: 'initial' };
+  assert.equal((await f.request('POST', { ...base, poster: 'https://attacker.invalid/pixel.webp' })).status, 400);
+  assert.equal((await f.request('POST', { ...base, poster: '/images/other.jpg' })).status, 400);
+  assert.equal((await f.request('POST', { ...base, poster: 123 })).status, 400);
+  const bytes = new Uint8Array(24); bytes.set(Buffer.from('RIFF'), 0); bytes.set(Buffer.from('WEBPVP8 '), 8);
+  new DataView(bytes.buffer).setUint32(4, 16, true);
+  const upload = await f.request('POST', null, { query: '?upload=1', raw: bytes, headers: { 'Content-Type': 'image/webp' } });
+  assert.equal(upload.status, 201);
+  const created = await f.request('POST', { ...base, poster: upload.body.url });
+  assert.equal(created.status, 201);
+  assert.equal(created.body.sectorPolicies[0].poster, upload.body.url);
+  const updated = await f.request('PATCH', { ...base, id: created.body.sectorPolicies[0].id,
+    revision: created.body.revision, title: '문구 수정' });
+  assert.equal(updated.status, 200);
+  assert.equal(updated.body.sectorPolicies[0].poster, upload.body.url);
+});
