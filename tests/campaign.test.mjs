@@ -194,7 +194,7 @@ test('construction seed publishes three revised policies even with pre-existing 
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
   assert.equal(seed.sectorPolicies.length, 3);
   assert.deepEqual(seed.sectorPolicies.map(p => p.order), [1, 2, 3]);
-  assert.ok(seed.sectorPolicies.every(p => p.published && p.union === '건설산업연맹' && p.field === '건설노조'));
+  assert.ok(seed.sectorPolicies.every(p => p.published && p.union === '건설노동자' && p.field === '건설노조'));
   const f = fixture(seed);
   f.stores.set(CONTENT_STORE, new Map([['published', {
     data: { news: [{ id: 'news-1', title: '기존 소식', date: '2026-10-30', content: '보존', images: [] }],
@@ -306,7 +306,7 @@ test('worker-facing card headline is validated, saved and remains editable', asy
     published: true, revision: updated.body.revision });
   assert.equal(olderApiEdit.status, 200);
   assert.equal(olderApiEdit.body.sectorPolicies[0].headline, '건설기계노동자와 함께 만들겠습니다.');
-  assert.equal(olderApiEdit.body.sectorPolicies[0].union, '건설산업연맹');
+  assert.equal(olderApiEdit.body.sectorPolicies[0].union, '건설노동자');
 });
 
 test('migrates four saved construction pledges to three without losing unrelated live data', async () => {
@@ -339,7 +339,7 @@ test('migrates four saved construction pledges to three without losing unrelated
   assert.equal(initial.body.videos.length, 1);
   assert.equal(initial.body.videoUrl, 'https://youtu.be/abcdefghijk');
   assert.equal(initial.body.constructionContentVersion, 2);
-  const construction = initial.body.sectorPolicies.filter(p => p.union === '건설산업연맹');
+  const construction = initial.body.sectorPolicies.filter(p => p.union === '건설노동자');
   assert.equal(construction.length, 3);
   assert.deepEqual(construction.map(p => p.title), seed.sectorPolicies.map(p => p.title));
   assert.deepEqual(construction.map(p => p.content), seed.sectorPolicies.map(p => p.content));
@@ -356,13 +356,13 @@ test('migrates four saved construction pledges to three without losing unrelated
   assert.equal(edited.body.constructionContentVersion, 2);
   const afterEdit = await f.request('GET', null, { auth: false });
   assert.equal(afterEdit.body.sectorPolicies.find(p => p.id === construction[0].id).title, '수정 후 유지되는 제목');
-  assert.equal(afterEdit.body.sectorPolicies.filter(p => p.union === '건설산업연맹').length, 3);
+  assert.equal(afterEdit.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
   assert.equal(afterEdit.body.news[0].images[0], 'images/old.jpg');
   const deleted = await f.request('DELETE', { kind: 'sectorPolicies',
     id: construction[2].id, revision: edited.body.revision });
   assert.equal(deleted.status, 200);
   const afterDeletion = await f.request('GET', null, { auth: false });
-  assert.equal(afterDeletion.body.sectorPolicies.filter(p => p.union === '건설산업연맹').length, 2);
+  assert.equal(afterDeletion.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 2);
   assert.equal(afterDeletion.body.sectorPolicies.find(p => p.id === 'other-sector').content, '유지할 내용');
 });
 
