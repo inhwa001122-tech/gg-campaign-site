@@ -39,6 +39,15 @@ function sectorShareLink(union, poster) {
   if (union === '교육노동자' && poster === '/images/education-poster.webp') {
     return location.origin + '/education-poster.html';
   }
+  if (union === 'IT노동자' && poster === '/images/it-worker-poster.webp') {
+    return location.origin + '/it-poster.html';
+  }
+  if (union === '공무원노동자' && poster === '/images/civilservice-worker-poster.webp') {
+    return location.origin + '/civilservice-poster.html';
+  }
+  if (union === '보건의료노동자' && poster === '/images/healthcare-worker-poster.webp') {
+    return location.origin + '/healthcare-poster.html';
+  }
   return location.origin + '/#' + (sectorAnchors[union] || 'sectorPolicies');
 }
 async function copySectorLink(link, button) {
