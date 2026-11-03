@@ -82,3 +82,24 @@ test('new sectors have direct pledge links, readable cards, and a share action',
   assert.match(js, /'공약 링크 복사'/);
   assert.match(css, /\.sector-card\.has-poster,\.sector-card\.worker-card-fullwidth\{grid-column:span 2\}/);
 });
+
+test('IT, civil service and healthcare supplied web posters are all linked to their policy cards', () => {
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const js = readFileSync(new URL('../gg-campaign-site/live-content.js', import.meta.url), 'utf8');
+  const fs = readFileSync;
+  const specs = [
+    ['IT노동자', 'it', 'it-policy', 'it-worker-poster.webp'],
+    ['공무원노동자', 'civilservice', 'civilservice-policy', 'civilservice-worker-poster.webp'],
+    ['보건의료노동자', 'healthcare', 'healthcare-policy', 'healthcare-worker-poster.webp'],
+  ];
+  for (const [union, slug, anchor, image] of specs) {
+    const item = seed.sectorPolicies.find(p => p.union === union && p.order === 1);
+    assert.equal(item.poster, '/images/' + image);
+    assert.match(js, new RegExp('/' + slug + '-poster\\.html'));
+    const landing = fs(new URL('../gg-campaign-site/' + slug + '-poster.html', import.meta.url), 'utf8');
+    assert.match(landing, new RegExp('og:image" content="https://thethe-up-2\\.netlify\\.app/images/' + image.replace('.', '\\.') + '"'));
+    assert.ok(landing.includes("window.location.replace('/#" + anchor + "')"));
+    assert.ok(landing.includes('href="https://thethe-up-2.netlify.app/#' + anchor + '"'));
+    assert.ok(landing.includes('src="images/' + image + '"'));
+  }
+});
