@@ -115,6 +115,8 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
       // has older photos/videos saved in Netlify Blobs. Never reset that existing data.
       // A removed default stays removed through an explicit deletion marker.
       if (stored.retiredSeedPolicyIds !== undefined && !Array.isArray(stored.retiredSeedPolicyIds)) throw Error('Stored content schema');
+      const constructionContentVersion = 2;
+      const upgradingConstruction = (stored.constructionContentVersion || 0) < constructionContentVersion;
       const retiredSeedPolicyIds = stored.retiredSeedPolicyIds || [];
       const sectorPolicies = [...(stored.sectorPolicies || [])];
       for (const item of (Array.isArray(seed.sectorPolicies) ? seed.sectorPolicies : [])) {
