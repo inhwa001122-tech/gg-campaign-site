@@ -115,11 +115,21 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
       // has older photos/videos saved in Netlify Blobs. Never reset that existing data.
       // A removed default stays removed through an explicit deletion marker.
       if (stored.retiredSeedPolicyIds !== undefined && !Array.isArray(stored.retiredSeedPolicyIds)) throw Error('Stored content schema');
-      const retiredSeedPolicyIds = stored.retiredSeedPolicyIds || [];
-      const sectorPolicies = [...(stored.sectorPolicies || [])];
+      const constructionContentVersion = 2;
+      const upgradingConstruction = (stored.constructionContentVersion || 0) < constructionContentVersion;
+      const oldConstructionIds = [1, 2, 3, 4].map(n => `seed-construction-20261103-${n}`);
+      const retiredSeedPolicyIds = [...(stored.retiredSeedPolicyIds || [])].filter(id =>
+        !upgradingConstruction || !oldConstructionIds.includes(id));
+      const sectorPolicies = (stored.sectorPolicies || []).filter(item =>
+        !upgradingConstruction || item.id !== oldConstructionIds[3]).map(item => ({ ...item }));
       for (const item of (Array.isArray(seed.sectorPolicies) ? seed.sectorPolicies : [])) {
         const saved = sectorPolicies.find(p => p.id === item.id);
-        if (!saved && !retiredSeedPolicyIds.includes(item.id)) {
+        if (saved && upgradingConstruction && oldConstructionIds.includes(item.id)) {
+          Object.assign(saved, item, {
+            publishedAt: saved.publishedAt || item.publishedAt,
+            poster: saved.poster === undefined ? (item.poster || '') : saved.poster
+          });
+        } else if (!saved && !retiredSeedPolicyIds.includes(item.id)) {
           sectorPolicies.push({ ...item });
         } else if (saved && item.poster && saved.poster === undefined) {
           // One-time web poster addition for older published seed records.
@@ -127,7 +137,7 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
           saved.poster = item.poster;
         }
       }
-      const data = { ...stored, videos: stored.videos || [], sectorPolicies, retiredSeedPolicyIds };
+      const data = { ...stored, videos: stored.videos || [], sectorPolicies, retiredSeedPolicyIds, constructionContentVersion };
       if (!writing) {
         // Unpublished campaign promises must remain private to authenticated managers.
         const visible = url.searchParams.get('admin') === '1' ? data : {
