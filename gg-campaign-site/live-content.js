@@ -29,6 +29,7 @@ function sectorShareLink(union, poster) {
   if (union === '건설노동자' && poster === '/images/construction-poster.webp') {
     return location.origin + '/construction-poster.html';
   }
+  if (union === '교육노동자') return location.origin + '/#education-policy';
   return location.origin + '/#sectorPolicies';
 }
 async function copySectorLink(link, button) {
@@ -76,20 +77,23 @@ function renderSectors() {
     const body = el('div', undefined, 'sector-card-body');
     const details = el('div', undefined, 'sector-fields-wrap');
     // The commitment is already the main card heading; don't repeat it below.
-    if (poster) {
+    if (poster || union === '교육노동자') {
       // Show the poster only in the collapsed card summary. Keep its sharing
       // action in the expanded full-width policy content, without a duplicate image.
-      const share = el('button', '웹자보·공약 링크 복사', 'sector-poster-share');
+      const share = el('button', poster ? '웹자보·공약 링크 복사' : '공약 링크 복사', 'sector-poster-share');
       share.type = 'button';
       share.onclick = () => copySectorLink(sectorShareLink(union, poster), share);
       details.append(share);
     }
     const isConstruction = union === '건설노동자' && fields.has('건설노조');
+    const isEducation = union === '교육노동자' && fields.has('교육');
     if (isConstruction) group.id = 'construction-policy';
+    if (isEducation) group.id = 'education-policy';
     for (const [field, policies] of fields) {
       const detail = el('details', undefined, 'sector-field'), head = el('summary', field);
       detail.append(head);
-      if (isConstruction && field === '건설노조' && location.hash === '#construction-policy') {
+      if ((isConstruction && field === '건설노조' && location.hash === '#construction-policy') ||
+          (isEducation && field === '교육' && location.hash === '#education-policy')) {
         group.open = true;
         detail.open = true;
       }
@@ -106,8 +110,8 @@ function renderSectors() {
     body.append(details);
     group.append(body); grid.append(group);
   }
-  if (location.hash === '#construction-policy' && !constructionDeepLinkOpened) {
-    const target = $('construction-policy');
+  if (['#construction-policy', '#education-policy'].includes(location.hash) && !constructionDeepLinkOpened) {
+    const target = $(location.hash.slice(1));
     if (target) {
       constructionDeepLinkOpened = true;
       requestAnimationFrame(() => target.scrollIntoView({ behavior: 'auto', block: 'start' }));
@@ -115,7 +119,7 @@ function renderSectors() {
   }
 }
 window.addEventListener('hashchange', () => {
-  if (location.hash !== '#construction-policy') return;
+  if (!['#construction-policy', '#education-policy'].includes(location.hash)) return;
   constructionDeepLinkOpened = false;
   if (state) renderSectors();
 });
