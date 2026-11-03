@@ -137,6 +137,11 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
           saved.poster = item.poster;
         }
       }
+      // Rename the existing production category without resetting saved pledges or other content.
+      // Older Netlify Blobs entries can still contain the former federation label.
+      for (const item of sectorPolicies) {
+        if (item.union === '건설산업연맹') item.union = '건설노동자';
+      }
       const data = { ...stored, videos: stored.videos || [], sectorPolicies, retiredSeedPolicyIds, constructionContentVersion };
       if (!writing) {
         // Unpublished campaign promises must remain private to authenticated managers.
@@ -182,7 +187,8 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
             }
             item.images = [...new Set(input.images)];
           } else if (kind === 'sectorPolicies') {
-            item.union = text(input.union, 80);
+            const selectedUnion = text(input.union, 80);
+            item.union = selectedUnion === '건설산업연맹' ? '건설노동자' : selectedUnion;
             item.field = input.field === '' || input.field === undefined ? '' : text(input.field, 80);
             item.content = text(input.content, 6000);
             const previous = index < 0 ? null : list[index];
