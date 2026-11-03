@@ -178,7 +178,7 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
             const previous = index < 0 ? null : list[index];
             if (input.headline !== undefined) {
               const headline = text(input.headline, 120);
-              if (!/^.{1,70}노동자와 함께 만들겠습니다\\.$/u.test(headline)) {
+              if (!/^.{1,70}노동자와 함께 만들겠습니다\.$/u.test(headline)) {
                 fail('대표 문구는 ‘건설노동자와 함께 만들겠습니다.’ 형식으로 입력해 주세요.');
               }
               item.headline = headline;
