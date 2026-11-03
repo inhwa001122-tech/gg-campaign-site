@@ -129,7 +129,7 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
         '/images/civilservice-worker-telegram-v2.webp': '/images/civilservice-worker-original-v3.webp',
         '/images/healthcare-worker-poster.webp': '/images/healthcare-worker-original-v3.webp',
         '/images/healthcare-worker-telegram-v2.webp': '/images/healthcare-worker-original-v3.webp'
-      };;
+      };
       for (const item of (Array.isArray(seed.sectorPolicies) ? seed.sectorPolicies : [])) {
         const saved = sectorPolicies.find(p => p.id === item.id);
         if (saved && olderWorkerPosters[saved.poster] === item.poster) {
