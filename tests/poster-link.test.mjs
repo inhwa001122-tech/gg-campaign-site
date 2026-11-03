@@ -67,6 +67,18 @@ test('education web poster is published with full social preview and policy deep
   assert.match(education, /property="og:image" content="https:\/\/thethe-up-2\.netlify\.app\/images\/education-poster\.webp"/);
   assert.match(education, /window\.location\.replace\('\/#education-policy'\)/);
   assert.equal((education.match(/href="https:\/\/thethe-up-2\.netlify\.app\/#education-policy"/g) || []).length, 2);
-  assert.match(js, /group\.id = 'education-policy'/);
+  assert.match(js, /'교육노동자': 'education-policy'/);
   assert.match(js, /location\.origin \+ '\/education-poster\.html'/);
+});
+
+test('new sectors have direct pledge links, readable cards, and a share action', () => {
+  const js = readFileSync(new URL('../gg-campaign-site/live-content.js', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../gg-campaign-site/live-content.css', import.meta.url), 'utf8');
+  assert.match(js, /'IT노동자': 'it-policy'/);
+  assert.match(js, /'공무원노동자': 'civilservice-policy'/);
+  assert.match(js, /'보건의료노동자': 'healthcare-policy'/);
+  assert.match(js, /group\.id = anchorId/);
+  assert.match(js, /location\.hash === '#' \+ anchorId/);
+  assert.match(js, /'공약 링크 복사'/);
+  assert.match(css, /\.sector-card\.has-poster,\.sector-card\.worker-card-fullwidth\{grid-column:span 2\}/);
 });
