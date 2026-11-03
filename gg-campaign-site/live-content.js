@@ -47,7 +47,7 @@ function renderSectors() {
         group.open = true;
         detail.open = true;
       }
-      for (const policy of policies) {
+      for (const policy of policies.slice().sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER))) {
         const article = el('article', undefined, 'sector-policy'), title = el('h4', policy.title);
         const published = Date.parse(policy.publishedAt || '');
         if (Number.isFinite(published) && now >= published && now - published < 72 * 60 * 60 * 1000) {
