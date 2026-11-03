@@ -172,6 +172,7 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
             item.content = text(input.content, 6000);
             const previous = index < 0 ? null : list[index];
             if (previous?.headline) item.headline = previous.headline;
+            if (Number.isInteger(previous?.order)) item.order = previous.order;
             if (typeof input.published !== 'boolean') fail('공개 여부를 확인해 주세요.');
             item.published = input.published;
             // Only a transition from draft to published starts the 72-hour NEW period.
