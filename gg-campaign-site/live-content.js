@@ -76,18 +76,12 @@ function renderSectors() {
     const details = el('div', undefined, 'sector-fields-wrap');
     if (headline) details.append(el('p', headline, 'sector-intro'));
     if (poster) {
-      const sidebar = el('div', undefined, 'sector-poster-sidebar');
-      const large = el('a', undefined, 'sector-poster-expand');
-      large.href = poster; large.target = '_blank'; large.rel = 'noopener noreferrer';
-      large.title = '웹자보 원본 이미지 확대 보기';
-      const img = el('img'); img.src = poster; img.alt = `${union} 공약 웹자보 전체 이미지`; img.loading = 'lazy';
-      large.append(img);
-      const caption = el('p', '웹자보 확대 보기 ↗', 'sector-poster-caption');
+      // Show the poster only in the collapsed card summary. Keep its sharing
+      // action in the expanded full-width policy content, without a duplicate image.
       const share = el('button', '웹자보·공약 링크 복사', 'sector-poster-share');
       share.type = 'button';
       share.onclick = () => copySectorLink(sectorShareLink(union, poster), share);
-      sidebar.append(large, caption, share);
-      body.append(sidebar);
+      details.append(share);
     }
     const isConstruction = union === '건설산업연맹' && fields.has('건설노조');
     if (isConstruction) group.id = 'construction-policy';
