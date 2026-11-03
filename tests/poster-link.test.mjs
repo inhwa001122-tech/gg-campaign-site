@@ -88,9 +88,9 @@ test('IT, civil service and healthcare supplied web posters are all linked to th
   const js = readFileSync(new URL('../gg-campaign-site/live-content.js', import.meta.url), 'utf8');
   const fs = readFileSync;
   const specs = [
-    ['IT노동자', 'it', 'it-policy', 'it-worker-poster.webp'],
-    ['공무원노동자', 'civilservice', 'civilservice-policy', 'civilservice-worker-poster.webp'],
-    ['보건의료노동자', 'healthcare', 'healthcare-policy', 'healthcare-worker-poster.webp'],
+    ['IT노동자', 'it', 'it-policy', 'it-worker-telegram-v2.webp'],
+    ['공무원노동자', 'civilservice', 'civilservice-policy', 'civilservice-worker-telegram-v2.webp'],
+    ['보건의료노동자', 'healthcare', 'healthcare-policy', 'healthcare-worker-telegram-v2.webp'],
   ];
   for (const [union, slug, anchor, image] of specs) {
     const item = seed.sectorPolicies.find(p => p.union === union && p.order === 1);
@@ -100,6 +100,11 @@ test('IT, civil service and healthcare supplied web posters are all linked to th
     assert.match(landing, new RegExp('og:image" content="https://thethe-up-2\\.netlify\\.app/images/' + image.replace('.', '\\.') + '"'));
     assert.ok(landing.includes("window.location.replace('/#" + anchor + "')"));
     assert.ok(landing.includes('href="https://thethe-up-2.netlify.app/#' + anchor + '"'));
+    assert.match(landing, /property="og:image:width" content="720"/);
+    assert.match(landing, /property="og:image:height" content="1280"/);
+    assert.match(landing, /name="twitter:card" content="summary_large_image"/);
+    assert.ok(landing.includes('/' + slug + '-poster.html?v=2'));
+    assert.ok(js.includes('/' + slug + '-poster.html?v=2'));
     assert.ok(landing.includes('src="images/' + image + '"'));
   }
 });

@@ -431,3 +431,35 @@ test('IT, civil service and healthcare policies are added verbatim without chang
   assert.equal(read.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
   assert.equal(read.body.sectorPolicies.filter(p => p.union === '교육노동자').length, 3);
 });
+
+test('older worker web posters are upgraded without affecting edits, removals or unrelated content', async () => {
+  const { readFileSync } = await import('node:fs');
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const old = [
+    ['IT노동자', '/images/it-worker-poster.webp', '/images/it-worker-telegram-v2.webp'],
+    ['공무원노동자', '/images/civilservice-worker-poster.webp', '/images/civilservice-worker-telegram-v2.webp'],
+    ['보건의료노동자', '/images/healthcare-worker-poster.webp', '/images/healthcare-worker-telegram-v2.webp'],
+  ];
+  const previous = structuredClone(seed.sectorPolicies);
+  for(const [union,prior] of old) previous.find(p => p.union===union && p.order===1).poster=prior;
+  const explicitlyRemoved = previous.find(p => p.union==='IT노동자' && p.order===2);
+  explicitlyRemoved.poster='';
+  const f=fixture(seed);
+  f.stores.set(CONTENT_STORE,new Map([['published',{
+    data: {news: [{id:'news',title:'기존 뉴스',date:'2026-11-03',content:'보존',images:[]}],
+      shorts: [],videoUrl:'',videos:[],sectorPolicies:previous,constructionContentVersion:2,
+      retiredSeedPolicyIds:[]},
+    etag:'old-worker-poster-revision'
+  }]]));
+  const read=await f.request('GET',null,{auth:false});
+  assert.equal(read.status,200);
+  for(const [union,prior,updated] of old){
+    const item=read.body.sectorPolicies.find(p=>p.union===union && p.order===1);
+    assert.equal(item.poster,updated);
+    assert.notEqual(item.poster,prior);
+  }
+  assert.ok(!read.body.sectorPolicies.find(p=>p.id===explicitlyRemoved.id).poster);
+  assert.equal(read.body.news[0].title,'기존 뉴스');
+  assert.equal(read.body.sectorPolicies.filter(p=>p.union==='건설노동자').length,3);
+  assert.equal(read.body.sectorPolicies.filter(p=>p.union==='교육노동자').length,3);
+});
