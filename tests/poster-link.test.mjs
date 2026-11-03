@@ -24,8 +24,8 @@ test('sector poster appears once as a card thumbnail while policies occupy full 
   assert.doesNotMatch(js, /sector-poster-expand|sector-poster-sidebar|웹자보 확대 보기/);
   assert.match(css, /\.sector-card\.has-poster \.sector-card-body\{display:block;width:100%\}/);
   assert.doesNotMatch(css, /sector-poster-sidebar|sector-poster-expand/);
-  assert.match(index, /<b>산별·업종별 공약<\/b>/);
-  assert.match(index, /<h3>산별·업종별 공약 관리<\/h3>/);
+  assert.match(index, /<b>산업별·업종별 공약<\/b>/);
+  assert.match(index, /<h3>산업별·업종별 공약 관리<\/h3>/);
   assert.doesNotMatch(index, /산별·업종별 맞춤 공약/);
 });
 
