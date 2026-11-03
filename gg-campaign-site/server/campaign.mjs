@@ -176,7 +176,20 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
             item.field = input.field === '' || input.field === undefined ? '' : text(input.field, 80);
             item.content = text(input.content, 6000);
             const previous = index < 0 ? null : list[index];
-            if (previous?.headline) item.headline = previous.headline;
+            if (input.headline !== undefined) {
+              const headline = text(input.headline, 120);
+              if (!/^.{1,70}노동자와 함께 만들겠습니다\.$/u.test(headline)) {
+                fail('대표 문구는 ‘건설노동자와 함께 만들겠습니다.’ 형식으로 입력해 주세요.');
+              }
+              item.headline = headline;
+            } else if (previous?.headline) {
+              item.headline = previous.headline;
+            } else {
+              // Keep older clients backward-compatible while giving every new
+              // sector card the same worker-centered public heading format.
+              const type = (item.field || item.union).replace(/노조$/u, '').trim();
+              item.headline = `${type}노동자와 함께 만들겠습니다.`;
+            }
             if (Number.isInteger(previous?.order)) item.order = previous.order;
             // Poster image is optional and managed with the existing authenticated
             // 1 MB WebP photo upload service. No third-party URLs are accepted.

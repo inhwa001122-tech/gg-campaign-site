@@ -285,3 +285,26 @@ test('sector poster uploads reuse protected WebP pipeline and disallow remote im
   assert.equal(updated.status, 200);
   assert.equal(updated.body.sectorPolicies[0].poster, upload.body.url);
 });
+
+test('worker-facing card headline is validated, saved and remains editable', async () => {
+  const f = fixture();
+  const body = { kind: 'sectorPolicies', union: '건설산업연맹', field: '건설노조',
+    title: '건설 공약', content: '현장 약속', published: true,
+    headline: '건설노동자와 함께 만들겠습니다.', revision: 'initial' };
+  assert.equal((await f.request('POST', { ...body, headline: '다른 표현' })).status, 400);
+  const created = await f.request('POST', body);
+  assert.equal(created.status, 201);
+  assert.equal(created.body.sectorPolicies[0].headline, '건설노동자와 함께 만들겠습니다.');
+  const original = created.body.sectorPolicies[0];
+  const updated = await f.request('PATCH', { ...body, id: original.id,
+    headline: '건설기계노동자와 함께 만들겠습니다.', revision: created.body.revision });
+  assert.equal(updated.status, 200);
+  assert.equal(updated.body.sectorPolicies[0].headline, '건설기계노동자와 함께 만들겠습니다.');
+  assert.equal(updated.body.sectorPolicies[0].publishedAt, original.publishedAt);
+  const olderApiEdit = await f.request('PATCH', { kind: 'sectorPolicies', id: original.id,
+    union: original.union, field: original.field, title: '변경', content: '새로운 내용',
+    published: true, revision: updated.body.revision });
+  assert.equal(olderApiEdit.status, 200);
+  assert.equal(olderApiEdit.body.sectorPolicies[0].headline, '건설기계노동자와 함께 만들겠습니다.');
+  assert.equal(olderApiEdit.body.sectorPolicies[0].union, '건설산업연맹');
+});
