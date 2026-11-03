@@ -9,8 +9,8 @@ test('construction poster retains social link-preview metadata', () => {
   assert.match(html, /property="og:title"/);
   assert.match(html, /property="og:url"/);
 });
-test('clicking poster preview redirects ordinary visitors to homepage pledges', () => {
-  assert.match(html, /window\.location\.replace\('\/#pledges'\)/);
-  assert.equal((html.match(/href="https:\/\/thethe-up-2\.netlify\.app\/#pledges"/g) || []).length, 2);
+test('clicking poster preview redirects ordinary visitors to construction sector pledges', () => {
+  assert.match(html, /window\.location\.replace\('\/#construction-policy'\)/);
+  assert.equal((html.match(/href="https:\/\/thethe-up-2\.netlify\.app\/#construction-policy"/g) || []).length, 2);
   assert.match(html, /has\('preview'\)/);
 });

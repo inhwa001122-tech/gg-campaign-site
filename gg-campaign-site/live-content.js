@@ -2,7 +2,7 @@ import { MAX_PHOTOS, MAX_IMAGE_BYTES, youtubeId, embedUrl } from './campaign-sha
 
 const $ = id => document.getElementById(id);
 const endpoint = '/.netlify/functions/campaign';
-let token = '', state = null, selection = [], busy = false;
+let token = '', state = null, selection = [], busy = false, constructionDeepLinkOpened = false;
 const el = (tag, text, className) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; };
 function status(message, error = false) {
   $('contentAdminStatus').textContent = message;
@@ -36,10 +36,18 @@ function renderSectors() {
     summary.append(el('span', union, 'sector-card-name'), el('span', `${fields.size}개 분야 · 공약 ${count}건 ＋`, 'sector-card-meta'));
     group.append(summary);
     const body = el('div', undefined, 'sector-card-body');
+    const headline = [...fields.values()].flat().find(policy => policy.headline)?.headline;
+    if (headline) body.append(el('p', headline, 'sector-intro'));
+    const isConstruction = union === '건설산업연맹' && fields.has('건설노조');
+    if (isConstruction) group.id = 'construction-policy';
     for (const [field, policies] of fields) {
       const detail = el('details', undefined, 'sector-field'), head = el('summary', field);
       detail.append(head);
-      for (const policy of policies) {
+      if (isConstruction && field === '건설노조' && location.hash === '#construction-policy') {
+        group.open = true;
+        detail.open = true;
+      }
+      for (const policy of policies.slice().sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER))) {
         const article = el('article', undefined, 'sector-policy'), title = el('h4', policy.title);
         const published = Date.parse(policy.publishedAt || '');
         if (Number.isFinite(published) && now >= published && now - published < 72 * 60 * 60 * 1000) {
@@ -51,7 +59,19 @@ function renderSectors() {
     }
     group.append(body); grid.append(group);
   }
+  if (location.hash === '#construction-policy' && !constructionDeepLinkOpened) {
+    const target = $('construction-policy');
+    if (target) {
+      constructionDeepLinkOpened = true;
+      requestAnimationFrame(() => target.scrollIntoView({ behavior: 'auto', block: 'start' }));
+    }
+  }
 }
+window.addEventListener('hashchange', () => {
+  if (location.hash !== '#construction-policy') return;
+  constructionDeepLinkOpened = false;
+  if (state) renderSectors();
+});
 function renderLandscapeVideos() {
   const list = (state.videos || []).filter(v => youtubeId(v.url));
   const collection = $('landscapeCollection'), grid = $('landscapeGrid');
@@ -274,7 +294,7 @@ const site = await window.campaignSiteReady;
 try { await reload(); }
 catch {
   // Keep existing deployed content visible during a storage outage; never write a reset.
-  state = { news: (site?.news || []).map((n, i) => ({ ...n, id: `fallback-${i}`, images: n.image ? [n.image] : [] })), shorts: [], videos: [], sectorPolicies: [], videoUrl: site?.videoUrl || '' };
+  state = { news: (site?.news || []).map((n, i) => ({ ...n, id: `fallback-${i}`, images: n.image ? [n.image] : [] })), shorts: [], videos: [], sectorPolicies: (site?.sectorPolicies || []).filter(p => p.published === true), videoUrl: site?.videoUrl || '' };
   renderPublic(); status('실시간 소식을 불러오지 못했습니다. 기존 소식을 표시합니다. 잠시 후 새로고침해 주세요.', true);
 }
 // Visitors see changes without redeployment; don't interrupt an administrator's edits.

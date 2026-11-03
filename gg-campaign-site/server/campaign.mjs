@@ -111,7 +111,18 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
       if (!stored || !Array.isArray(stored.news) || !Array.isArray(stored.shorts) || typeof stored.videoUrl !== 'string' ||
         (stored.videos !== undefined && !Array.isArray(stored.videos)) ||
         (stored.sectorPolicies !== undefined && !Array.isArray(stored.sectorPolicies))) throw Error('Stored content schema');
-      const data = { ...stored, videos: stored.videos || [], sectorPolicies: stored.sectorPolicies || [] };
+      // Make newly published campaign pledges available even when production already
+      // has older photos/videos saved in Netlify Blobs. Never reset that existing data.
+      // A removed default stays removed through an explicit deletion marker.
+      if (stored.retiredSeedPolicyIds !== undefined && !Array.isArray(stored.retiredSeedPolicyIds)) throw Error('Stored content schema');
+      const retiredSeedPolicyIds = stored.retiredSeedPolicyIds || [];
+      const sectorPolicies = [...(stored.sectorPolicies || [])];
+      for (const item of (Array.isArray(seed.sectorPolicies) ? seed.sectorPolicies : [])) {
+        if (!sectorPolicies.some(p => p.id === item.id) && !retiredSeedPolicyIds.includes(item.id)) {
+          sectorPolicies.push({ ...item });
+        }
+      }
+      const data = { ...stored, videos: stored.videos || [], sectorPolicies, retiredSeedPolicyIds };
       if (!writing) {
         // Unpublished campaign promises must remain private to authenticated managers.
         const visible = url.searchParams.get('admin') === '1' ? data : {
@@ -135,7 +146,13 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
       } else {
         const list = data[kind], index = list.findIndex(n => n.id === input.id);
         if (request.method !== 'POST' && index === -1) fail('항목을 찾을 수 없습니다. 새로고침해 주세요.', 404);
-        if (request.method === 'DELETE') list.splice(index, 1);
+        if (request.method === 'DELETE') {
+          list.splice(index, 1);
+          if (kind === 'sectorPolicies' && Array.isArray(seed.sectorPolicies) &&
+            seed.sectorPolicies.some(p => p.id === input.id) && !data.retiredSeedPolicyIds.includes(input.id)) {
+            data.retiredSeedPolicyIds.push(input.id);
+          }
+        }
         else {
           if (request.method === 'POST' && list.length >= (kind === 'news' ? 200 : kind === 'sectorPolicies' ? 400 : 100)) fail('등록 한도에 도달했습니다. 오래된 항목을 정리해 주세요.');
           const item = { id: request.method === 'POST' ? randomUUID() : list[index].id, title: text(input.title, 120) };
@@ -153,6 +170,9 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
             item.union = text(input.union, 80);
             item.field = input.field === '' || input.field === undefined ? '' : text(input.field, 80);
             item.content = text(input.content, 6000);
+            const previous = index < 0 ? null : list[index];
+            if (previous?.headline) item.headline = previous.headline;
+            if (Number.isInteger(previous?.order)) item.order = previous.order;
             if (typeof input.published !== 'boolean') fail('공개 여부를 확인해 주세요.');
             item.published = input.published;
             // Only a transition from draft to published starts the 72-hour NEW period.

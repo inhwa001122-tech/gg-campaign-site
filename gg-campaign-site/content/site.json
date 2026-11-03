@@ -88,5 +88,51 @@
   ],
   "contactEmail": "",
   "instagramUrl": "https://www.instagram.com/v2v_jin_lee_baek_2?psln=M2E1amFzMjBidjd5&utm_source=qr",
-  "retentionPeriod": "선거 종료 후 30일 이내 파기(운영 확정 후 수정)"
+  "retentionPeriod": "선거 종료 후 30일 이내 파기(운영 확정 후 수정)",
+  "sectorPolicies": [
+    {
+      "id": "seed-construction-20261103-1",
+      "union": "건설산업연맹",
+      "field": "건설노조",
+      "title": "경기도의 모범 발주자 역할 강제",
+      "content": "- 재하도급을 포함한 불법 하도급 근절 -> 적발 시 공공발주 입찰 참여 제한\n- 하도급 임금, 장비대금 등 체불 근절 -> 표준근로계약서 제작 논의 및 사용 장려\n- 50억 원 미만 중소사업장 안전관리자 고용 기금 조성\n- 건설기계 표준 임대차 계약서 작성 여부 관리 -> 미작성 업체 입찰 제한\n- 근로계약서 작성 및 교부 감독 강화\n- 건설기계 임대의 경우 임대료와 임금을 분리해서 근로계약서 및 임대료 계약서 작성",
+      "published": true,
+      "publishedAt": "2026-11-03T00:00:00.000Z",
+      "headline": "건설노동자와 함께 만들겠습니다.",
+      "order": 1
+    },
+    {
+      "id": "seed-construction-20261103-2",
+      "union": "건설산업연맹",
+      "field": "건설노조",
+      "title": "[경기도 지역건설산업활성화 촉진 조례] 의 당사자로서 역할 강제",
+      "content": "- 조례에 명시된 도지사의 책무 이행 및 강제\n- 지역노동자 지역장비 우선고용 및 사용을 의무로 변경하도록 조례 개정\n- 성남건설기능학교, 안산건설기능학교 운영 예산 복원 및 확대\n- 청년노동자를 위한 '희망 기숙사' 건립 및 임금지급 공백 해소를 위한 단기 대부제 시행",
+      "published": true,
+      "publishedAt": "2026-11-03T00:00:00.000Z",
+      "headline": "건설노동자와 함께 만들겠습니다.",
+      "order": 2
+    },
+    {
+      "id": "seed-construction-20261103-3",
+      "union": "건설산업연맹",
+      "field": "건설노조",
+      "title": "건설기계 공영주기장 설치",
+      "content": "- 타 지자체의 사례 탐구\n- 지자체 협의를 통해 공영주기장 설치를 위한 제도 마련 및 시행",
+      "published": true,
+      "publishedAt": "2026-11-03T00:00:00.000Z",
+      "headline": "건설노동자와 함께 만들겠습니다.",
+      "order": 3
+    },
+    {
+      "id": "seed-construction-20261103-4",
+      "union": "건설산업연맹",
+      "field": "건설노조",
+      "title": "경기도 노정교섭 지원 및 공동 투쟁 모색",
+      "content": "- 건설노조 수도권남부본부와 경기도 유관 실, 국간 노정교섭 지원\n- 노동권 침해 근절 및 중대재해 예방을 위한 경기노동청 정례협의 확대",
+      "published": true,
+      "publishedAt": "2026-11-03T00:00:00.000Z",
+      "headline": "건설노동자와 함께 만들겠습니다.",
+      "order": 4
+    }
+  ]
 }
