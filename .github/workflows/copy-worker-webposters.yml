@@ -1,0 +1,63 @@
+name: Import worker web posters once
+on:
+  push:
+    branches: [feat/upload-three-worker-webposters-20261103]
+permissions:
+  contents: write
+jobs:
+  copy-posters:
+    runs-on: ubuntu-latest
+    env:
+      IT_POSTER_URL: "https://media.canva.com/v2/image-resize/format:PNG/height:200/quality:100/uri:ifs%3A%2F%2FM%2F5c7400fa-856e-45e6-907f-65c3d7ead284/watermark:F/width:112?csig=AAAAAAAAAAAAAAAAAAAAAKhMV-V4qlC2Zj3nnFKNSYJPTDCgqMjjoVVWKfvpQ4kg&exp=1793698506&osig=AAAAAAAAAAAAAAAAAAAAAMQA0U_w32pIyGmd8tZCrTarw8JVepEjk3EYb0b_eN4C&signer=media-rpc&token=AAIAAU0AJDVjNzQwMGZhLTg1NmUtNDVlNi05MDdmLTY1YzNkN2VhZDI4NAAAAAABoaDDJRDJJaH4mgE9igPAoAAFRx2l4BYWlw8jaaEBKeblsmWbag&x-canva-quality=thumbnail"
+      CIVIL_POSTER_URL: "https://media.canva.com/v2/image-resize/format:PNG/height:200/quality:100/uri:ifs%3A%2F%2FM%2Fc94302f6-c0fd-4fce-8aa9-647c33bfcc5c/watermark:F/width:112?csig=AAAAAAAAAAAAAAAAAAAAAOfKPgsYTSR5E--qeamu75Mb_hubew0UTRPZ0LpksWd7&exp=1793696771&osig=AAAAAAAAAAAAAAAAAAAAAOqILD4UMsyEwRQzF70kCiBDaiL5-w6dGmymyoQH7xHX&signer=media-rpc&token=AAIAAU0AJGM5NDMwMmY2LWMwZmQtNGZjZS04YWE5LTY0N2MzM2JmY2M1YwAAAAABoaCoq7iAMkAYkyepRuOHdrgYpRw6vbuf45Sf7wC-yWoFTiAPEA&x-canva-quality=thumbnail"
+      HEALTH_POSTER_URL: "https://media.canva.com/v2/image-resize/format:PNG/height:200/quality:100/uri:ifs%3A%2F%2FM%2F6922ab34-fecc-45cf-a4ed-bb9473f9244f/watermark:F/width:112?csig=AAAAAAAAAAAAAAAAAAAAAAXx_OBnrMOUPOLIpMScXZ5C50ksQhDA-6S3t0E_Oqwb&exp=1793697331&osig=AAAAAAAAAAAAAAAAAAAAAHoDAuQjyFqEirHDUW8KpHbtfOkUwZPG-kFEMCspDTHW&signer=media-rpc&token=AAIAAU0AJDY5MjJhYjM0LWZlY2MtNDVjZi1hNGVkLWJiOTQ3M2Y5MjQ0ZgAAAAABoaCxNzjJ_i00C7xLNOSq5S_qIHS5WPr4GkvwY7M_DcUrgGntTA&x-canva-quality=thumbnail"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --quiet Pillow
+      - name: Save three images in repository
+        run: |
+          python - <<'PY'
+          import os
+          import io
+          import urllib.request
+          from pathlib import Path
+          from PIL import Image
+          pairs = [
+              ('it-worker-poster.webp', os.environ['IT_POSTER_URL']),
+              ('civilservice-worker-poster.webp', os.environ['CIVIL_POSTER_URL']),
+              ('healthcare-worker-poster.webp', os.environ['HEALTH_POSTER_URL']),
+          ]
+          dest = Path('gg-campaign-site/images')
+          dest.mkdir(parents=True, exist_ok=True)
+          for filename, url in pairs:
+              large_url = url.replace('/height:200/', '/height:1280/').replace('/width:112?', '/width:720?')
+              variants = [large_url, url]
+              img = None
+              for variant in variants:
+                  try:
+                      req = urllib.request.Request(variant, headers={'User-Agent': 'Mozilla/5.0'})
+                      with urllib.request.urlopen(req, timeout=30) as response:
+                          raw = response.read()
+                      candidate = Image.open(io.BytesIO(raw))
+                      candidate.load()
+                      if candidate.width < 150 and variant != url:
+                          continue
+                      img = candidate
+                      break
+                  except Exception:
+                      continue
+              if img is None:
+                  raise RuntimeError(f'Could not transfer {filename}')
+              img.convert('RGB').save(dest / filename, 'WEBP', quality=90, method=6)
+              print(f'Wrote {filename}: {img.width}x{img.height}')
+          PY
+      - name: Commit website images
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add gg-campaign-site/images/*worker-poster.webp
+          git commit -m "Add three user-provided worker web posters"
+          git push origin HEAD:feat/upload-three-worker-webposters-20261103
