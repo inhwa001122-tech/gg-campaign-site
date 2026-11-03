@@ -168,7 +168,7 @@
       "published": true,
       "publishedAt": "2026-11-03T04:30:00.000Z",
       "order": 1,
-      "poster": "/images/it-worker-telegram-v2.webp"
+      "poster": "/images/it-worker-original-v3.webp"
     },
     {
       "id": "seed-it-20261103-2",
@@ -202,7 +202,7 @@
       "published": true,
       "publishedAt": "2026-11-03T04:30:00.000Z",
       "order": 1,
-      "poster": "/images/civilservice-worker-telegram-v2.webp"
+      "poster": "/images/civilservice-worker-original-v3.webp"
     },
     {
       "id": "seed-civilservice-20261103-2",
@@ -225,7 +225,7 @@
       "published": true,
       "publishedAt": "2026-11-03T04:30:00.000Z",
       "order": 1,
-      "poster": "/images/healthcare-worker-telegram-v2.webp"
+      "poster": "/images/healthcare-worker-original-v3.webp"
     },
     {
       "id": "seed-healthcare-20261103-2",

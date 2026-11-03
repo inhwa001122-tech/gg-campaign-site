@@ -436,9 +436,9 @@ test('older worker web posters are upgraded without affecting edits, removals or
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
   const old = [
-    ['IT노동자', '/images/it-worker-poster.webp', '/images/it-worker-telegram-v2.webp'],
-    ['공무원노동자', '/images/civilservice-worker-poster.webp', '/images/civilservice-worker-telegram-v2.webp'],
-    ['보건의료노동자', '/images/healthcare-worker-poster.webp', '/images/healthcare-worker-telegram-v2.webp'],
+    ['IT노동자', '/images/it-worker-poster.webp', '/images/it-worker-original-v3.webp'],
+    ['공무원노동자', '/images/civilservice-worker-telegram-v2.webp', '/images/civilservice-worker-original-v3.webp'],
+    ['보건의료노동자', '/images/healthcare-worker-telegram-v2.webp', '/images/healthcare-worker-original-v3.webp'],
   ];
   const previous = structuredClone(seed.sectorPolicies);
   for(const [union,prior] of old) previous.find(p => p.union===union && p.order===1).poster=prior;
