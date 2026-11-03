@@ -19,8 +19,10 @@ function frame(id, title) {
 
 function safePosterSrc(value) {
   if (typeof value !== 'string') return '';
-  if (/^\\/?images\\/[^?#]+$/u.test(value) && !value.split('/').includes('..')) return value;
-  if (/^\\/\\.netlify\\/functions\\/campaign\\?image=[a-f0-9-]{36}$/.test(value)) return value;
+  if ((value.startsWith('/images/') || value.startsWith('images/')) &&
+    !value.includes('?') && !value.includes('#') && !value.split('/').includes('..')) return value;
+  const prefix = '/.netlify/functions/campaign?image=';
+  if (value.startsWith(prefix) && /^[a-f0-9-]{36}$/.test(value.slice(prefix.length))) return value;
   return '';
 }
 function sectorShareLink(union, poster) {
