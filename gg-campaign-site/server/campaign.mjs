@@ -118,8 +118,13 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
       const retiredSeedPolicyIds = stored.retiredSeedPolicyIds || [];
       const sectorPolicies = [...(stored.sectorPolicies || [])];
       for (const item of (Array.isArray(seed.sectorPolicies) ? seed.sectorPolicies : [])) {
-        if (!sectorPolicies.some(p => p.id === item.id) && !retiredSeedPolicyIds.includes(item.id)) {
+        const saved = sectorPolicies.find(p => p.id === item.id);
+        if (!saved && !retiredSeedPolicyIds.includes(item.id)) {
           sectorPolicies.push({ ...item });
+        } else if (saved && item.poster && saved.poster === undefined) {
+          // One-time web poster addition for older published seed records.
+          // An explicit blank poster indicates that an editor removed it.
+          saved.poster = item.poster;
         }
       }
       const data = { ...stored, videos: stored.videos || [], sectorPolicies, retiredSeedPolicyIds };
@@ -173,6 +178,21 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
             const previous = index < 0 ? null : list[index];
             if (previous?.headline) item.headline = previous.headline;
             if (Number.isInteger(previous?.order)) item.order = previous.order;
+            // Poster image is optional and managed with the existing authenticated
+            // 1 MB WebP photo upload service. No third-party URLs are accepted.
+            const poster = input.poster === undefined ? (previous?.poster || '') : input.poster;
+            if (typeof poster !== 'string') fail('웹자보 이미지를 확인해 주세요.');
+            if (poster !== '') {
+              const isSame = previous?.poster === poster;
+              const isSeedImage = Array.isArray(seed.sectorPolicies) && seed.sectorPolicies.some(p => p.id === item.id && p.poster === poster);
+              const storedImage = /^\/\.netlify\/functions\/campaign\?image=([0-9a-f-]+)$/.exec(poster);
+              if (storedImage && uuid.test(storedImage[1])) {
+                if (!isSame && !await media().getMetadata(`photos/${storedImage[1]}`)) fail('업로드한 웹자보 이미지를 찾을 수 없습니다.');
+              } else if (!(isSeedImage && localImage(poster))) {
+                fail('웹자보 이미지 경로를 확인해 주세요.');
+              }
+            }
+            item.poster = poster;
             if (typeof input.published !== 'boolean') fail('공개 여부를 확인해 주세요.');
             item.published = input.published;
             // Only a transition from draft to published starts the 72-hour NEW period.
