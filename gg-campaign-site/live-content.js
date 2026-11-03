@@ -25,6 +25,13 @@ function safePosterSrc(value) {
   if (value.startsWith(prefix) && /^[a-f0-9-]{36}$/.test(value.slice(prefix.length))) return value;
   return '';
 }
+const sectorAnchors = {
+  '건설노동자': 'construction-policy',
+  '교육노동자': 'education-policy',
+  'IT노동자': 'it-policy',
+  '공무원노동자': 'civilservice-policy',
+  '보건의료노동자': 'healthcare-policy'
+};
 function sectorShareLink(union, poster) {
   if (union === '건설노동자' && poster === '/images/construction-poster.webp') {
     return location.origin + '/construction-poster.html';
@@ -32,7 +39,7 @@ function sectorShareLink(union, poster) {
   if (union === '교육노동자' && poster === '/images/education-poster.webp') {
     return location.origin + '/education-poster.html';
   }
-  return location.origin + '/#sectorPolicies';
+  return location.origin + '/#' + (sectorAnchors[union] || 'sectorPolicies');
 }
 async function copySectorLink(link, button) {
   try {
@@ -79,7 +86,7 @@ function renderSectors() {
     const body = el('div', undefined, 'sector-card-body');
     const details = el('div', undefined, 'sector-fields-wrap');
     // The commitment is already the main card heading; don't repeat it below.
-    if (poster || union === '교육노동자') {
+    {
       // Show the poster only in the collapsed card summary. Keep its sharing
       // action in the expanded full-width policy content, without a duplicate image.
       const share = el('button', poster ? '웹자보·공약 링크 복사' : '공약 링크 복사', 'sector-poster-share');
@@ -87,15 +94,12 @@ function renderSectors() {
       share.onclick = () => copySectorLink(sectorShareLink(union, poster), share);
       details.append(share);
     }
-    const isConstruction = union === '건설노동자' && fields.has('건설노조');
-    const isEducation = union === '교육노동자' && fields.has('교육');
-    if (isConstruction) group.id = 'construction-policy';
-    if (isEducation) group.id = 'education-policy';
+    const anchorId = sectorAnchors[union];
+    if (anchorId) group.id = anchorId;
     for (const [field, policies] of fields) {
       const detail = el('details', undefined, 'sector-field'), head = el('summary', field);
       detail.append(head);
-      if ((isConstruction && field === '건설노조' && location.hash === '#construction-policy') ||
-          (isEducation && field === '교육' && location.hash === '#education-policy')) {
+      if (anchorId && location.hash === '#' + anchorId) {
         group.open = true;
         detail.open = true;
       }
@@ -112,7 +116,7 @@ function renderSectors() {
     body.append(details);
     group.append(body); grid.append(group);
   }
-  if (['#construction-policy', '#education-policy'].includes(location.hash) && !constructionDeepLinkOpened) {
+  if (Object.values(sectorAnchors).some(id => location.hash === '#' + id) && !constructionDeepLinkOpened) {
     const target = $(location.hash.slice(1));
     if (target) {
       constructionDeepLinkOpened = true;
@@ -121,7 +125,7 @@ function renderSectors() {
   }
 }
 window.addEventListener('hashchange', () => {
-  if (!['#construction-policy', '#education-policy'].includes(location.hash)) return;
+  if (!Object.values(sectorAnchors).some(id => location.hash === '#' + id)) return;
   constructionDeepLinkOpened = false;
   if (state) renderSectors();
 });
