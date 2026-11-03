@@ -173,3 +173,18 @@ test('multiple landscape videos preserve the single existing representative vide
   assert.equal(del.body.videos.length, 1);
   assert.equal(del.body.videoUrl, v2.body.videoUrl);
 });
+
+test('unpublished sector drafts stay private in public API but visible to admins', async () => {
+  const { request } = fixture();
+  const draft = await request('POST', { kind: 'sectorPolicies', union: '금속노조', field: '자동차부품', title: '미공개 내용', content: '외부에 공개하지 않을 공약', published: false, revision: 'initial' });
+  assert.equal(draft.status, 201);
+  const publicRead = await request('GET', null, { auth: false });
+  assert.equal(publicRead.body.sectorPolicies.length, 0);
+  const adminRead = await request('GET', null, { query: '?admin=1' });
+  assert.equal(adminRead.body.sectorPolicies.length, 1);
+  assert.equal(adminRead.body.sectorPolicies[0].title, '미공개 내용');
+  const item = adminRead.body.sectorPolicies[0];
+  const publiced = await request('PATCH', { kind: 'sectorPolicies', id: item.id, union: item.union, field: item.field, title: item.title, content: item.content, published: true, revision: adminRead.body.revision });
+  const visible = await request('GET', null, { auth: false });
+  assert.equal(visible.body.sectorPolicies[0].publishedAt, publiced.body.sectorPolicies[0].publishedAt);
+});

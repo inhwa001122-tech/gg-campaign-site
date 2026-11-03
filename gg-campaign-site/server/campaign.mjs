@@ -112,7 +112,13 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
         (stored.videos !== undefined && !Array.isArray(stored.videos)) ||
         (stored.sectorPolicies !== undefined && !Array.isArray(stored.sectorPolicies))) throw Error('Stored content schema');
       const data = { ...stored, videos: stored.videos || [], sectorPolicies: stored.sectorPolicies || [] };
-      if (!writing) return json({ ...data, revision });
+      if (!writing) {
+        // Unpublished campaign promises must remain private to authenticated managers.
+        const visible = url.searchParams.get('admin') === '1' ? data : {
+          ...data, sectorPolicies: data.sectorPolicies.filter(item => item.published === true)
+        };
+        return json({ ...visible, revision });
+      }
       if (!(request.headers.get('content-type') || '').startsWith('application/json')) fail('JSON 요청이 필요합니다.', 415);
       let input;
       try { input = JSON.parse(new TextDecoder().decode(await readBody(request, 32768))); }
