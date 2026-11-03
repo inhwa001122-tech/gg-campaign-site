@@ -167,7 +167,8 @@
       "content": "- 공짜 노동, 장시간 노동, 크런치 모드 없는 노동환경 조성\n- 경기도, 지자체 발주 사업에 기업 선정 시 포괄임금제 사용 여부와 연동 페널티제도 도입\n- 화섬식품노조 IT위원회의 표준근로계약서 제작 논의 및 사용 장려",
       "published": true,
       "publishedAt": "2026-11-03T04:30:00.000Z",
-      "order": 1
+      "order": 1,
+      "poster": "/images/it-worker-poster.webp"
     },
     {
       "id": "seed-it-20261103-2",
@@ -200,7 +201,8 @@
       "content": "- 공무원도 근로기준법 전면 적용\n- 노조활동 막는 공무원노조법 전면 개정\n- 정치기본권 보장으로 시민의 권리 회복",
       "published": true,
       "publishedAt": "2026-11-03T04:30:00.000Z",
-      "order": 1
+      "order": 1,
+      "poster": "/images/civilservice-worker-poster.webp"
     },
     {
       "id": "seed-civilservice-20261103-2",
@@ -222,7 +224,8 @@
       "content": "- 경기도 의료원 체불 근절, 노후 병원 이전\n- 공공병원 (경기도 의료원, 적십자, 국립 암센터) 총액인건비 폐지",
       "published": true,
       "publishedAt": "2026-11-03T04:30:00.000Z",
-      "order": 1
+      "order": 1,
+      "poster": "/images/healthcare-worker-poster.webp"
     },
     {
       "id": "seed-healthcare-20261103-2",
