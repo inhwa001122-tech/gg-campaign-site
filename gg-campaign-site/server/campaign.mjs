@@ -123,10 +123,13 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
       const sectorPolicies = (stored.sectorPolicies || []).filter(item =>
         !upgradingConstruction || item.id !== oldConstructionIds[3]).map(item => ({ ...item }));
       const olderWorkerPosters = {
-        '/images/it-worker-poster.webp': '/images/it-worker-telegram-v2.webp',
-        '/images/civilservice-worker-poster.webp': '/images/civilservice-worker-telegram-v2.webp',
-        '/images/healthcare-worker-poster.webp': '/images/healthcare-worker-telegram-v2.webp'
-      };
+        '/images/it-worker-poster.webp': '/images/it-worker-original-v3.webp',
+        '/images/it-worker-telegram-v2.webp': '/images/it-worker-original-v3.webp',
+        '/images/civilservice-worker-poster.webp': '/images/civilservice-worker-original-v3.webp',
+        '/images/civilservice-worker-telegram-v2.webp': '/images/civilservice-worker-original-v3.webp',
+        '/images/healthcare-worker-poster.webp': '/images/healthcare-worker-original-v3.webp',
+        '/images/healthcare-worker-telegram-v2.webp': '/images/healthcare-worker-original-v3.webp'
+      };;
       for (const item of (Array.isArray(seed.sectorPolicies) ? seed.sectorPolicies : [])) {
         const saved = sectorPolicies.find(p => p.id === item.id);
         if (saved && olderWorkerPosters[saved.poster] === item.poster) {
