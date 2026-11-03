@@ -133,7 +133,8 @@
       "published": true,
       "publishedAt": "2026-11-03T00:00:00.000Z",
       "headline": "교육노동자와 함께 만들겠습니다.",
-      "order": 1
+      "order": 1,
+      "poster": "/images/education-poster.webp"
     },
     {
       "id": "seed-education-20261103-2",
