@@ -20,4 +20,4 @@ jobs:
           node --check gg-campaign-site/campaign-updates.js
           node --check gg-campaign-site/server/campaign.mjs
       - name: Run backend regression tests
-        run: node --test tests/campaign.test.mjs
+        run: node --test tests/campaign.test.mjs tests/poster-link.test.mjs
