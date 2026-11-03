@@ -26,7 +26,7 @@ function safePosterSrc(value) {
   return '';
 }
 function sectorShareLink(union, poster) {
-  if (union === '건설산업연맹' && poster === '/images/construction-poster.webp') {
+  if (union === '건설노동자' && poster === '/images/construction-poster.webp') {
     return location.origin + '/construction-poster.html';
   }
   return location.origin + '/#sectorPolicies';
@@ -84,7 +84,7 @@ function renderSectors() {
       share.onclick = () => copySectorLink(sectorShareLink(union, poster), share);
       details.append(share);
     }
-    const isConstruction = union === '건설산업연맹' && fields.has('건설노조');
+    const isConstruction = union === '건설노동자' && fields.has('건설노조');
     if (isConstruction) group.id = 'construction-policy';
     for (const [field, policies] of fields) {
       const detail = el('details', undefined, 'sector-field'), head = el('summary', field);
