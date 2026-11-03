@@ -41,3 +41,17 @@ test('public industry section and pledge cards use worker-centered headings only
   assert.match(js, /headline: \$\('sectorHeadline'\)\.value/);
   assert.match(js, /\$\('sectorHeadline'\)\.value = item\.headline \|\| ''/);
 });
+
+test('portrait and landscape uploads display fully without forcing a landscape crop', () => {
+  const styles = readFileSync(new URL('../gg-campaign-site/styles.css', import.meta.url), 'utf8');
+  const content = readFileSync(new URL('../gg-campaign-site/live-content.css', import.meta.url), 'utf8');
+  const script = readFileSync(new URL('../gg-campaign-site/live-content.js', import.meta.url), 'utf8');
+  assert.match(styles, /\.news-thumb\{min-height:210px;height:auto;/);
+  assert.match(styles, /\.news-thumb img\{display:block;width:100%;height:auto;max-height:560px;object-fit:contain\}/);
+  assert.match(styles, /\.dialog-panel img\{display:block;width:auto;max-width:100%;height:auto;max-height:none;object-fit:contain;/);
+  assert.match(styles, /\.candidate-img img\{height:100%;width:100%;object-fit:contain\}/);
+  assert.match(styles, /\.hero-photo img\{width:100%;height:100%;object-fit:contain\}/);
+  assert.match(content, /\.photo-selection img\{display:block;width:auto;max-width:100%;height:auto;max-height:250px;object-fit:contain;/);
+  assert.match(content, /\.sector-poster-thumb\{width:96px;height:132px;flex:none;object-fit:contain;/);
+  assert.match(script, /imageOrientation: 'from-image'/);
+});
