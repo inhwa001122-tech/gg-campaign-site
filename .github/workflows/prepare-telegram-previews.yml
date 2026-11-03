@@ -1,0 +1,39 @@
+name: Prepare large Telegram poster previews
+on:
+  push:
+    branches: [fix/fullsize-telegram-posters-20261103]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --quiet pillow
+      - name: Create large poster preview assets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageFilter
+          base=Path('gg-campaign-site/images')
+          for name in ('it', 'civilservice', 'healthcare'):
+              source=base / f'{name}-worker-poster.webp'
+              target=base / f'{name}-worker-telegram-v2.webp'
+              with Image.open(source) as raw:
+                  original=raw.convert('RGB')
+                  image=original.resize((720,1280), Image.Resampling.LANCZOS)
+                  image=image.filter(ImageFilter.UnsharpMask(radius=1.35, percent=115, threshold=2))
+                  image.save(target,'WEBP',quality=90,method=6)
+                  print(f'{source.name}: {original.size} => {target.name}: {image.size}')
+          PY
+      - name: Commit larger preview images
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add gg-campaign-site/images/*-worker-telegram-v2.webp
+          git diff --cached --quiet && exit 0
+          git commit -m "Generate 720px Telegram preview assets"
+          git push origin HEAD:fix/fullsize-telegram-posters-20261103
