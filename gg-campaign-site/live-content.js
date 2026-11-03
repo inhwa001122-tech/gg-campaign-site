@@ -67,14 +67,15 @@ function renderSectors() {
       summary.append(img);
     }
     const info = el('span', undefined, 'sector-summary-info');
-    info.append(el('span', union, 'sector-card-name'));
-    if (headline) info.append(el('span', headline, 'sector-summary-headline'));
+    // The public card leads with the workers' shared commitment, never the
+    // internal federation/union classification used by the admin.
+    info.append(el('span', headline || '현장 노동자와 함께 만들겠습니다.', 'sector-card-name'));
     info.append(el('span', `${fields.size}개 분야 · 공약 ${count}건 · 클릭해서 보기 ＋`, 'sector-card-meta'));
     summary.append(info);
     group.append(summary);
     const body = el('div', undefined, 'sector-card-body');
     const details = el('div', undefined, 'sector-fields-wrap');
-    if (headline) details.append(el('p', headline, 'sector-intro'));
+    // The commitment is already the main card heading; don't repeat it below.
     if (poster) {
       // Show the poster only in the collapsed card summary. Keep its sharing
       // action in the expanded full-width policy content, without a duplicate image.
@@ -224,6 +225,7 @@ function editLandscape(item) {
 function editSector(item) {
   resetSector(); $('sectorPolicyId').value = item.id;
   $('sectorUnion').value = item.union; $('sectorField').value = item.field;
+  $('sectorHeadline').value = item.headline || '';
   $('sectorPolicyTitle').value = item.title; $('sectorPolicyBody').value = item.content;
   $('sectorPolicyPublished').checked = item.published;
   const poster = safePosterSrc(item.poster);
@@ -366,6 +368,7 @@ $('sectorPolicyEditor').onsubmit = event => {
     apply(await api(id ? 'PATCH' : 'POST', {
       kind: 'sectorPolicies', id,
       union: $('sectorUnion').value, field: $('sectorField').value,
+      headline: $('sectorHeadline').value,
       title: $('sectorPolicyTitle').value, content: $('sectorPolicyBody').value,
       poster: sectorPosterSelection?.url || '',
       published: $('sectorPolicyPublished').checked, revision: state.revision
