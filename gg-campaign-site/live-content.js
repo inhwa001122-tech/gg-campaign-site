@@ -29,7 +29,9 @@ function sectorShareLink(union, poster) {
   if (union === '건설노동자' && poster === '/images/construction-poster.webp') {
     return location.origin + '/construction-poster.html';
   }
-  if (union === '교육노동자') return location.origin + '/#education-policy';
+  if (union === '교육노동자' && poster === '/images/education-poster.webp') {
+    return location.origin + '/education-poster.html';
+  }
   return location.origin + '/#sectorPolicies';
 }
 async function copySectorLink(link, button) {
