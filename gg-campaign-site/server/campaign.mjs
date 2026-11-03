@@ -117,8 +117,11 @@ export function createCampaignHandler({ getStore, seed = {}, secret = () => proc
       if (stored.retiredSeedPolicyIds !== undefined && !Array.isArray(stored.retiredSeedPolicyIds)) throw Error('Stored content schema');
       const constructionContentVersion = 2;
       const upgradingConstruction = (stored.constructionContentVersion || 0) < constructionContentVersion;
-      const retiredSeedPolicyIds = stored.retiredSeedPolicyIds || [];
-      const sectorPolicies = [...(stored.sectorPolicies || [])];
+      const oldConstructionIds = [1, 2, 3, 4].map(n => `seed-construction-20261103-${n}`);
+      const retiredSeedPolicyIds = [...(stored.retiredSeedPolicyIds || [])].filter(id =>
+        !upgradingConstruction || !oldConstructionIds.includes(id));
+      const sectorPolicies = (stored.sectorPolicies || []).filter(item =>
+        !upgradingConstruction || item.id !== oldConstructionIds[3]).map(item => ({ ...item }));
       for (const item of (Array.isArray(seed.sectorPolicies) ? seed.sectorPolicies : [])) {
         const saved = sectorPolicies.find(p => p.id === item.id);
         if (!saved && !retiredSeedPolicyIds.includes(item.id)) {
