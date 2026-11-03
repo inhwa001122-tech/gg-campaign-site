@@ -458,7 +458,7 @@ test('older worker web posters are upgraded without affecting edits, removals or
     assert.equal(item.poster,updated);
     assert.notEqual(item.poster,prior);
   }
-  assert.equal(read.body.sectorPolicies.find(p=>p.id===explicitlyRemoved.id).poster,'');
+  assert.ok(!read.body.sectorPolicies.find(p=>p.id===explicitlyRemoved.id).poster);
   assert.equal(read.body.news[0].title,'기존 뉴스');
   assert.equal(read.body.sectorPolicies.filter(p=>p.union==='건설노동자').length,3);
   assert.equal(read.body.sectorPolicies.filter(p=>p.union==='교육노동자').length,3);
