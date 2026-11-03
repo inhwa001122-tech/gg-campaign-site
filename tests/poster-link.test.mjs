@@ -55,3 +55,18 @@ test('portrait and landscape uploads display fully without forcing a landscape c
   assert.match(content, /\.sector-poster-thumb\{width:96px;height:132px;flex:none;object-fit:contain;/);
   assert.match(script, /imageOrientation: 'from-image'/);
 });
+
+
+test('education web poster is published with full social preview and policy deep link', () => {
+  const education = readFileSync(new URL('../gg-campaign-site/education-poster.html', import.meta.url), 'utf8');
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const js = readFileSync(new URL('../gg-campaign-site/live-content.js', import.meta.url), 'utf8');
+  const educationPolicies = seed.sectorPolicies.filter(p => p.union === '교육노동자');
+  assert.equal(educationPolicies.length, 3);
+  assert.equal(educationPolicies[0].poster, '/images/education-poster.webp');
+  assert.match(education, /property="og:image" content="https:\/\/thethe-up-2\.netlify\.app\/images\/education-poster\.webp"/);
+  assert.match(education, /window\.location\.replace\('\/#education-policy'\)/);
+  assert.equal((education.match(/href="https:\/\/thethe-up-2\.netlify\.app\/#education-policy"/g) || []).length, 2);
+  assert.match(js, /group\.id = 'education-policy'/);
+  assert.match(js, /location\.origin \+ '\/education-poster\.html'/);
+});
