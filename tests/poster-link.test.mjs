@@ -103,15 +103,18 @@ test('IT, civil service and healthcare supplied web posters are all linked to th
     assert.equal(binary.readUInt16LE(28) & 0x3fff, 2048);
     assert.match(js, new RegExp('/' + slug + '-poster\\.html'));
     const landing = fs(new URL('../gg-campaign-site/' + slug + '-poster.html', import.meta.url), 'utf8');
-    assert.match(landing, new RegExp('og:image" content="https://thethe-up-2\\.netlify\\.app/images/' + image.replace('.', '\\.') + '"'));
+    // An earlier image-only update refreshed the social preview to v4 while
+    // published card images and in-site share links remain on v3.
+    const landingImage = image.replace('-v3.webp', '-v4.webp');
+    assert.match(landing, new RegExp('og:image" content="https://thethe-up-2\\.netlify\\.app/images/' + landingImage.replace('.', '\\.') + '"'));
     assert.ok(landing.includes("window.location.replace('/#" + anchor + "')"));
     assert.ok(landing.includes('href="https://thethe-up-2.netlify.app/#' + anchor + '"'));
     assert.match(landing, /property="og:image:width" content="1152"/);
     assert.match(landing, /property="og:image:height" content="2048"/);
     assert.match(landing, /name="twitter:card" content="summary_large_image"/);
-    assert.ok(landing.includes('/' + slug + '-poster.html?v=3'));
+    assert.ok(landing.includes('/' + slug + '-poster.html?v=4'));
     assert.ok(js.includes('/' + slug + '-poster.html?v=3'));
-    assert.ok(landing.includes('src="images/' + image + '"'));
+    assert.ok(landing.includes('src="images/' + landingImage + '"'));
   }
 });
 
