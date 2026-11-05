@@ -124,3 +124,37 @@ test('Telegram buttons use the current channel invite link everywhere', () => {
   assert.match(script, /\['telegramUrl','telegram'\]/);
   assert.match(updates, /\['telegramUrl','텔레그램'/);
 });
+
+test('three original high-resolution new web posters have Telegram previews and per-sector landing links', () => {
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const js = readFileSync(new URL('../gg-campaign-site/live-content.js', import.meta.url), 'utf8');
+  const specs = [
+    ['사회서비스노동자', '사회서비스 노동자와 함께 만들겠습니다.', 'social-service', 'social-service-policy', 'social-service-poster-v1.webp'],
+    ['학교비정규직·교육공무직노동자', '학교 비정규직, 교육공무직 노동자와 함께 만들겠습니다.', 'school-worker', 'school-worker-policy', 'school-worker-poster-v1.webp'],
+    ['특수고용·플랫폼노동자', '특수고용·플랫폼 노동자와 함께 만들겠습니다.', 'platform-worker', 'platform-worker-policy', 'platform-worker-poster-v1.webp']
+  ];
+  for (const [union, headline, slug, anchor, image] of specs) {
+    const first = seed.sectorPolicies.find(p => p.union === union && p.order === 1);
+    assert.ok(first, union);
+    assert.equal(first.poster, '/images/' + image);
+    assert.equal(first.headline, headline);
+    const binary = readFileSync(new URL('../gg-campaign-site/images/' + image, import.meta.url));
+    assert.equal(binary.toString('ascii', 0, 4), 'RIFF');
+    assert.equal(binary.toString('ascii', 8, 12), 'WEBP');
+    assert.equal(binary.toString('ascii', 12, 16), 'VP8 ');
+    assert.equal(binary.readUInt16LE(26) & 0x3fff, 1152);
+    assert.equal(binary.readUInt16LE(28) & 0x3fff, 2048);
+    const landing = readFileSync(new URL('../gg-campaign-site/' + slug + '-poster.html', import.meta.url), 'utf8');
+    assert.ok(landing.includes('property="og:image" content="https://thethe-up-2.netlify.app/images/' + image + '"'));
+    assert.ok(landing.includes('property="og:image:width" content="1152"'));
+    assert.ok(landing.includes('property="og:image:height" content="2048"'));
+    assert.ok(landing.includes('content="summary_large_image"'));
+    assert.ok(landing.includes("window.location.replace('/#" + anchor + "')"));
+    assert.ok(landing.includes('href="https://thethe-up-2.netlify.app/#' + anchor + '"'));
+    assert.ok(landing.includes('src="images/' + image + '"'));
+    assert.ok(landing.includes('/' + slug + '-poster.html?v=1'));
+    assert.ok(js.includes('/' + slug + '-poster.html?v=1'));
+    assert.ok(js.includes("'" + anchor + "'"));
+  }
+  assert.match(js, /\.includes\(union\)/);
+});
