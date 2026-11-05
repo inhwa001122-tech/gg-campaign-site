@@ -30,7 +30,10 @@ const sectorAnchors = {
   '교육노동자': 'education-policy',
   'IT노동자': 'it-policy',
   '공무원노동자': 'civilservice-policy',
-  '보건의료노동자': 'healthcare-policy'
+  '보건의료노동자': 'healthcare-policy',
+  '사회서비스노동자': 'social-service-policy',
+  '학교비정규직·교육공무직노동자': 'school-worker-policy',
+  '특수고용·플랫폼노동자': 'platform-worker-policy'
 };
 function sectorShareLink(union, poster) {
   if (union === '건설노동자' && poster === '/images/construction-poster.webp') {
@@ -47,6 +50,15 @@ function sectorShareLink(union, poster) {
   }
   if (union === '보건의료노동자' && poster === '/images/healthcare-worker-original-v3.webp') {
     return location.origin + '/healthcare-poster.html?v=3';
+  }
+  if (union === '사회서비스노동자' && poster === '/images/social-service-poster-v1.webp') {
+    return location.origin + '/social-service-poster.html?v=1';
+  }
+  if (union === '학교비정규직·교육공무직노동자' && poster === '/images/school-worker-poster-v1.webp') {
+    return location.origin + '/school-worker-poster.html?v=1';
+  }
+  if (union === '특수고용·플랫폼노동자' && poster === '/images/platform-worker-poster-v1.webp') {
+    return location.origin + '/platform-worker-poster.html?v=1';
   }
   return location.origin + '/#' + (sectorAnchors[union] || 'sectorPolicies');
 }
@@ -74,7 +86,7 @@ function renderSectors() {
   const now = Date.now();
   for (const [union, fields] of groups) {
     const group = el('details', undefined, 'sector-card'), summary = el('summary');
-    if (['IT노동자', '공무원노동자', '보건의료노동자'].includes(union)) {
+    if (['IT노동자', '공무원노동자', '보건의료노동자', '사회서비스노동자', '학교비정규직·교육공무직노동자', '특수고용·플랫폼노동자'].includes(union)) {
       group.classList.add('worker-card-fullwidth');
     }
     const allPolicies = [...fields.values()].flat();

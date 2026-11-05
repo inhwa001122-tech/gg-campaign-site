@@ -192,7 +192,7 @@ test('unpublished sector drafts stay private in public API but visible to admins
 test('construction seed publishes three revised policies even with pre-existing Netlify data', async () => {
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
-  assert.equal(seed.sectorPolicies.length, 14);
+  assert.equal(seed.sectorPolicies.length, 26);
   assert.deepEqual(seed.sectorPolicies.filter(p => p.union === '건설노동자').map(p => p.order), [1, 2, 3]);
   assert.ok(seed.sectorPolicies.every(p => p.published));
   assert.equal(seed.sectorPolicies.filter(p => p.union === '건설노동자' && p.field === '건설노조').length, 3);
@@ -208,15 +208,15 @@ test('construction seed publishes three revised policies even with pre-existing 
   assert.equal(read.body.news[0].title, '기존 소식');
   assert.equal(read.body.shorts.length, 1);
   assert.equal(read.body.videoUrl, 'https://www.youtube.com/watch?v=abcdefghijk');
-  assert.equal(read.body.sectorPolicies.length, 14);
+  assert.equal(read.body.sectorPolicies.length, 26);
   const admin = await f.request('GET', null, { query: '?admin=1' });
-  assert.equal(admin.body.sectorPolicies.length, 14);
+  assert.equal(admin.body.sectorPolicies.length, 26);
   const target = admin.body.sectorPolicies.find(p => p.order === 1);
   const updated = await f.request('PATCH', { kind: 'sectorPolicies', id: target.id, union: target.union,
     field: target.field, title: '수정 테스트', content: target.content, published: true,
     revision: admin.body.revision });
   assert.equal(updated.status, 200);
-  assert.equal(updated.body.sectorPolicies.length, 14);
+  assert.equal(updated.body.sectorPolicies.length, 26);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).headline, target.headline);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).order, 1);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).publishedAt, target.publishedAt);
@@ -224,7 +224,7 @@ test('construction seed publishes three revised policies even with pre-existing 
   const deleted = await f.request('DELETE', { kind: 'sectorPolicies', id: target.id, revision: updated.body.revision });
   assert.equal(deleted.status, 200);
   const readAgain = await f.request('GET', null, { auth: false });
-  assert.equal(readAgain.body.sectorPolicies.length, 13);
+  assert.equal(readAgain.body.sectorPolicies.length, 25);
   assert.ok(!readAgain.body.sectorPolicies.some(p => p.id === target.id));
   assert.equal(readAgain.body.news.length, 1);
 });
@@ -426,7 +426,7 @@ test('IT, civil service and healthcare policies are added verbatim without chang
   const f = fixture(seed);
   const read = await f.request('GET', null, { auth: false });
   assert.equal(read.status, 200);
-  assert.equal(read.body.sectorPolicies.length, 14);
+  assert.equal(read.body.sectorPolicies.length, 26);
   for(const [k,name] of names.entries()) assert.equal(read.body.sectorPolicies.filter(p => p.union === name).length, counts[k]);
   assert.equal(read.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
   assert.equal(read.body.sectorPolicies.filter(p => p.union === '교육노동자').length, 3);
@@ -462,4 +462,60 @@ test('older worker web posters are upgraded without affecting edits, removals or
   assert.equal(read.body.news[0].title,'기존 뉴스');
   assert.equal(read.body.sectorPolicies.filter(p=>p.union==='건설노동자').length,3);
   assert.equal(read.body.sectorPolicies.filter(p=>p.union==='교육노동자').length,3);
+});
+
+test('social-service, school staff and platform worker seed pledges are complete and isolated', async () => {
+  const { readFileSync } = await import('node:fs');
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const groups = [
+    {
+      name: '사회서비스노동자', field: '사회서비스', prefix: 'socialservice',
+      headline: '사회서비스 노동자와 함께 만들겠습니다.',
+      poster: '/images/social-service-poster-v1.webp',
+      titles: ['돌봄 노동자 노동권, 처우 개선 실현', '경기도 31개 지자체에 사회서비스원 도입', '국가책임 돌봄 실현', '사회서비스노동자 단결 실현'],
+      details: [3, 1, 1, 2]
+    },
+    {
+      name: '학교비정규직·교육공무직노동자', field: '학교비정규직·교육공무직', prefix: 'schoolworker',
+      headline: '학교 비정규직, 교육공무직 노동자와 함께 만들겠습니다.',
+      poster: '/images/school-worker-poster-v1.webp',
+      titles: ['정규직과의 임금-복무 격차 해소', '방학 중 무임금과 불안정한 일자리를 바꾼다', '교육재정 국가책임 강화', '적정인력 충원과 노동안전 강화'],
+      details: [2, 2, 2, 2]
+    },
+    {
+      name: '특수고용·플랫폼노동자', field: '특수고용·플랫폼', prefix: 'platform',
+      headline: '특수고용·플랫폼 노동자와 함께 만들겠습니다.',
+      poster: '/images/platform-worker-poster-v1.webp',
+      titles: ['특수고용-플랫폼 노동자 근기법 전면 적용', '최저임금 적용 및 적정임금 보장', '일터 안전과 플랫폼 알고리즘 알권리 보장', '불안정노동자와 함께 싸우는 민주노총 경기도본부'],
+      details: [1, 2, 2, 3]
+    }
+  ];
+  for (const group of groups) {
+    const records = seed.sectorPolicies.filter(item => item.union === group.name);
+    assert.equal(records.length, 4, group.name);
+    assert.deepEqual(records.map(item => item.title), group.titles);
+    assert.deepEqual(records.map(item => item.order), [1, 2, 3, 4]);
+    assert.deepEqual(records.map(item => item.content.split('\n').length), group.details);
+    assert.ok(records.every(item => item.headline === group.headline && item.field === group.field && item.published));
+    assert.ok(records.every(item => Number.isFinite(Date.parse(item.publishedAt))));
+    assert.equal(records[0].poster, group.poster);
+    assert.ok(records.slice(1).every(item => item.poster === undefined));
+    assert.ok(records.every((item,i)=>item.id === `seed-${group.prefix}-20261105-${i+1}`));
+  }
+  const social = seed.sectorPolicies.filter(x => x.union === '사회서비스노동자');
+  assert.match(social[0].content, /장애인활동지원사 등에 월급제 시행/);
+  assert.match(social[3].content, /적극적이고 공정한 갈등조정/);
+  const school = seed.sectorPolicies.filter(x => x.union === '학교비정규직·교육공무직노동자');
+  assert.match(school[2].content, /지방교육재정교부금의 안정적 확보와 국가예산 확충/);
+  assert.match(school[3].content, /학교 급식실 폐암 예방 등 교육공무직 건강권 보장/);
+  const platform = seed.sectorPolicies.filter(x => x.union === '특수고용·플랫폼노동자');
+  assert.match(platform[0].content, /<일하는사람기본법> 저지/);
+  assert.match(platform[1].content, /‘적정임금’ 보장으로/);
+  assert.match(platform[3].content, /<불안정노동특위> 구성/);
+  const f = fixture(seed);
+  const publicRead = await f.request('GET', null, {auth: false});
+  assert.equal(publicRead.body.sectorPolicies.length, 26);
+  for (const group of groups) assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === group.name).length, 4);
+  assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
+  assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === '교육노동자').length, 3);
 });

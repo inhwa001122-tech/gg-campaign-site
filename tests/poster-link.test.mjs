@@ -103,15 +103,18 @@ test('IT, civil service and healthcare supplied web posters are all linked to th
     assert.equal(binary.readUInt16LE(28) & 0x3fff, 2048);
     assert.match(js, new RegExp('/' + slug + '-poster\\.html'));
     const landing = fs(new URL('../gg-campaign-site/' + slug + '-poster.html', import.meta.url), 'utf8');
-    assert.match(landing, new RegExp('og:image" content="https://thethe-up-2\\.netlify\\.app/images/' + image.replace('.', '\\.') + '"'));
+    // An earlier image-only update refreshed the social preview to v4 while
+    // published card images and in-site share links remain on v3.
+    const landingImage = slug === 'it' ? image.replace('-v3.webp', '-v4.webp') : image;
+    assert.match(landing, new RegExp('og:image" content="https://thethe-up-2\\.netlify\\.app/images/' + landingImage.replace('.', '\\.') + '"'));
     assert.ok(landing.includes("window.location.replace('/#" + anchor + "')"));
     assert.ok(landing.includes('href="https://thethe-up-2.netlify.app/#' + anchor + '"'));
     assert.match(landing, /property="og:image:width" content="1152"/);
     assert.match(landing, /property="og:image:height" content="2048"/);
     assert.match(landing, /name="twitter:card" content="summary_large_image"/);
-    assert.ok(landing.includes('/' + slug + '-poster.html?v=3'));
+    assert.ok(landing.includes('/' + slug + '-poster.html?v=' + (slug === 'it' ? '4' : '3')));
     assert.ok(js.includes('/' + slug + '-poster.html?v=3'));
-    assert.ok(landing.includes('src="images/' + image + '"'));
+    assert.ok(landing.includes('src="images/' + landingImage + '"'));
   }
 });
 
@@ -123,4 +126,38 @@ test('Telegram buttons use the current channel invite link everywhere', () => {
   assert.notEqual(seed.telegramUrl, 'https://t.me/+FriTf8gd-TwwYjA1');
   assert.match(script, /\['telegramUrl','telegram'\]/);
   assert.match(updates, /\['telegramUrl','텔레그램'/);
+});
+
+test('three original high-resolution new web posters have Telegram previews and per-sector landing links', () => {
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const js = readFileSync(new URL('../gg-campaign-site/live-content.js', import.meta.url), 'utf8');
+  const specs = [
+    ['사회서비스노동자', '사회서비스 노동자와 함께 만들겠습니다.', 'social-service', 'social-service-policy', 'social-service-poster-v1.webp'],
+    ['학교비정규직·교육공무직노동자', '학교 비정규직, 교육공무직 노동자와 함께 만들겠습니다.', 'school-worker', 'school-worker-policy', 'school-worker-poster-v1.webp'],
+    ['특수고용·플랫폼노동자', '특수고용·플랫폼 노동자와 함께 만들겠습니다.', 'platform-worker', 'platform-worker-policy', 'platform-worker-poster-v1.webp']
+  ];
+  for (const [union, headline, slug, anchor, image] of specs) {
+    const first = seed.sectorPolicies.find(p => p.union === union && p.order === 1);
+    assert.ok(first, union);
+    assert.equal(first.poster, '/images/' + image);
+    assert.equal(first.headline, headline);
+    const binary = readFileSync(new URL('../gg-campaign-site/images/' + image, import.meta.url));
+    assert.equal(binary.toString('ascii', 0, 4), 'RIFF');
+    assert.equal(binary.toString('ascii', 8, 12), 'WEBP');
+    assert.equal(binary.toString('ascii', 12, 16), 'VP8 ');
+    assert.equal(binary.readUInt16LE(26) & 0x3fff, 1152);
+    assert.equal(binary.readUInt16LE(28) & 0x3fff, 2048);
+    const landing = readFileSync(new URL('../gg-campaign-site/' + slug + '-poster.html', import.meta.url), 'utf8');
+    assert.ok(landing.includes('property="og:image" content="https://thethe-up-2.netlify.app/images/' + image + '"'));
+    assert.ok(landing.includes('property="og:image:width" content="1152"'));
+    assert.ok(landing.includes('property="og:image:height" content="2048"'));
+    assert.ok(landing.includes('content="summary_large_image"'));
+    assert.ok(landing.includes("window.location.replace('/#" + anchor + "')"));
+    assert.ok(landing.includes('href="https://thethe-up-2.netlify.app/#' + anchor + '"'));
+    assert.ok(landing.includes('src="images/' + image + '"'));
+    assert.ok(landing.includes('/' + slug + '-poster.html?v=1'));
+    assert.ok(js.includes('/' + slug + '-poster.html?v=1'));
+    assert.ok(js.includes("'" + anchor + "'"));
+  }
+  assert.match(js, /\.includes\(union\)/);
 });
