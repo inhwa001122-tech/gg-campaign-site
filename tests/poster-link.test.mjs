@@ -161,3 +161,30 @@ test('three original high-resolution new web posters have Telegram previews and 
   }
   assert.match(js, /\.includes\(union\)/);
 });
+
+
+test('public-sector nonregular image, Telegram share preview and homepage deep link stay connected', () => {
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const item = seed.sectorPolicies.find(p => p.id === 'seed-publicnonregular-20261106-1');
+  assert.equal(item.union, '공공부문 비정규직 노동자');
+  assert.equal(item.poster, '/images/public-nonregular-poster-v1.webp');
+  const binary = readFileSync(new URL('../gg-campaign-site/images/public-nonregular-poster-v1.webp', import.meta.url));
+  assert.equal(binary.toString('ascii', 0, 4), 'RIFF');
+  assert.equal(binary.toString('ascii', 8, 12), 'WEBP');
+  assert.equal(binary.toString('ascii', 12, 16), 'VP8 ');
+  assert.equal(binary.readUInt16LE(26) & 0x3fff, 1152);
+  assert.equal(binary.readUInt16LE(28) & 0x3fff, 2048);
+  const landing = readFileSync(new URL('../gg-campaign-site/public-nonregular-poster.html', import.meta.url), 'utf8');
+  const js = readFileSync(new URL('../gg-campaign-site/live-content.js', import.meta.url), 'utf8');
+  assert.match(landing, /property="og:image" content="https:\/\/thethe-up-2\.netlify\.app\/images\/public-nonregular-poster-v1\.webp"/);
+  assert.match(landing, /property="og:image:width" content="1152"/);
+  assert.match(landing, /property="og:image:height" content="2048"/);
+  assert.match(landing, /name="twitter:card" content="summary_large_image"/);
+  assert.match(landing, /window\.location\.replace\('\/#public-nonregular-policy'\)/);
+  assert.ok(landing.includes('href="https://thethe-up-2.netlify.app/#public-nonregular-policy"'));
+  assert.ok(landing.includes('src="images/public-nonregular-poster-v1.webp"'));
+  assert.ok(landing.includes('public-nonregular-poster.html?v=1'));
+  assert.ok(js.includes("'공공부문 비정규직 노동자': 'public-nonregular-policy'"));
+  assert.ok(js.includes("'/public-nonregular-poster.html?v=1'"));
+  assert.ok(js.includes("'공공부문 비정규직 노동자'"));
+});

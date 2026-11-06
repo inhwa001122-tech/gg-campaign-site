@@ -192,7 +192,7 @@ test('unpublished sector drafts stay private in public API but visible to admins
 test('construction seed publishes three revised policies even with pre-existing Netlify data', async () => {
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
-  assert.equal(seed.sectorPolicies.length, 26);
+  assert.equal(seed.sectorPolicies.length, 30);
   assert.deepEqual(seed.sectorPolicies.filter(p => p.union === '건설노동자').map(p => p.order), [1, 2, 3]);
   assert.ok(seed.sectorPolicies.every(p => p.published));
   assert.equal(seed.sectorPolicies.filter(p => p.union === '건설노동자' && p.field === '건설노조').length, 3);
@@ -208,15 +208,15 @@ test('construction seed publishes three revised policies even with pre-existing 
   assert.equal(read.body.news[0].title, '기존 소식');
   assert.equal(read.body.shorts.length, 1);
   assert.equal(read.body.videoUrl, 'https://www.youtube.com/watch?v=abcdefghijk');
-  assert.equal(read.body.sectorPolicies.length, 26);
+  assert.equal(read.body.sectorPolicies.length, 30);
   const admin = await f.request('GET', null, { query: '?admin=1' });
-  assert.equal(admin.body.sectorPolicies.length, 26);
+  assert.equal(admin.body.sectorPolicies.length, 30);
   const target = admin.body.sectorPolicies.find(p => p.order === 1);
   const updated = await f.request('PATCH', { kind: 'sectorPolicies', id: target.id, union: target.union,
     field: target.field, title: '수정 테스트', content: target.content, published: true,
     revision: admin.body.revision });
   assert.equal(updated.status, 200);
-  assert.equal(updated.body.sectorPolicies.length, 26);
+  assert.equal(updated.body.sectorPolicies.length, 30);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).headline, target.headline);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).order, 1);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).publishedAt, target.publishedAt);
@@ -224,7 +224,7 @@ test('construction seed publishes three revised policies even with pre-existing 
   const deleted = await f.request('DELETE', { kind: 'sectorPolicies', id: target.id, revision: updated.body.revision });
   assert.equal(deleted.status, 200);
   const readAgain = await f.request('GET', null, { auth: false });
-  assert.equal(readAgain.body.sectorPolicies.length, 25);
+  assert.equal(readAgain.body.sectorPolicies.length, 29);
   assert.ok(!readAgain.body.sectorPolicies.some(p => p.id === target.id));
   assert.equal(readAgain.body.news.length, 1);
 });
@@ -426,7 +426,7 @@ test('IT, civil service and healthcare policies are added verbatim without chang
   const f = fixture(seed);
   const read = await f.request('GET', null, { auth: false });
   assert.equal(read.status, 200);
-  assert.equal(read.body.sectorPolicies.length, 26);
+  assert.equal(read.body.sectorPolicies.length, 30);
   for(const [k,name] of names.entries()) assert.equal(read.body.sectorPolicies.filter(p => p.union === name).length, counts[k]);
   assert.equal(read.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
   assert.equal(read.body.sectorPolicies.filter(p => p.union === '교육노동자').length, 3);
@@ -514,8 +514,47 @@ test('social-service, school staff and platform worker seed pledges are complete
   assert.match(platform[3].content, /<불안정노동특위> 구성/);
   const f = fixture(seed);
   const publicRead = await f.request('GET', null, {auth: false});
-  assert.equal(publicRead.body.sectorPolicies.length, 26);
+  assert.equal(publicRead.body.sectorPolicies.length, 30);
   for (const group of groups) assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === group.name).length, 4);
   assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
   assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === '교육노동자').length, 3);
+});
+
+
+test('public-sector nonregular worker pledges are complete and do not disturb the existing 26', async () => {
+  const { readFileSync } = await import('node:fs');
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const union = '공공부문 비정규직 노동자';
+  const items = seed.sectorPolicies.filter(p => p.union === union);
+  const expectedTitles = [
+    '정부-학교 등 모든 공무직 노동자 차별철폐-처우개선',
+    '중규직을 넘어 정규직 완성으로',
+    '공공기관 간접고용 노동자 권리 보장',
+    '불안정노동자와 함께 싸우는 민주노총 경기도본부'
+  ];
+  assert.equal(seed.sectorPolicies.length, 30);
+  assert.deepEqual(items.map(x => x.title), expectedTitles);
+  assert.deepEqual(items.map(x => x.order), [1,2,3,4]);
+  assert.deepEqual(items.map(x => x.content.split('\n').length), [2,2,2,3]);
+  assert.ok(items.every(x => x.published && x.headline === '공공부문 비정규직 노동자와 함께 만들겠습니다.'));
+  assert.ok(items.every(x => Number.isFinite(Date.parse(x.publishedAt))));
+  assert.equal(items[0].poster, '/images/public-nonregular-poster-v1.webp');
+  assert.match(items[0].content, /공무직 처우개선 예산 쟁취로 각종 수당 차별 철폐/);
+  assert.match(items[0].content, /공무직 법제화로 차별 없는 노동과 일터 실현/);
+  assert.match(items[1].content, /공공기관 무기계약직 직제구분 폐지 및 정규직화/);
+  assert.match(items[1].content, /처우개선 가로 막는 총인건비 가이드라인 분쇄/);
+  assert.match(items[2].content, /공공발주 용역계약 체결 시 인건비 낙찰률 적용 배제 입법 쟁취/);
+  assert.match(items[2].content, /<용역근로자 근로조건 보호지침> 적용 확대 및 실효성 강화/);
+  assert.match(items[3].content, /<불안정노동특위> 구성/);
+  assert.match(items[3].content, /경기도본부 운영위 참석 및 의결 참여 방안 마련 등 불안정노동자 대표성 확대/);
+  assert.match(items[3].content, /고용형태를 뛰어넘는 연대투쟁 활성화/);
+  const f = fixture(seed);
+  const publicRead = await f.request('GET', null, { auth:false });
+  assert.equal(publicRead.status, 200);
+  assert.equal(publicRead.body.sectorPolicies.length, 30);
+  assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === union).length, 4);
+  assert.equal(publicRead.body.sectorPolicies.filter(p => p.union !== union).length, 26);
+  assert.equal(publicRead.body.sectorPolicies.find(p => p.id === items[0].id).poster, items[0].poster);
+  assert.ok(publicRead.body.sectorPolicies.some(p => p.id === 'seed-construction-20261103-1'));
+  assert.ok(publicRead.body.sectorPolicies.some(p => p.id === 'seed-education-20261103-1'));
 });

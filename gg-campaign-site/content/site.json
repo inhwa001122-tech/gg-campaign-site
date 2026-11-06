@@ -383,6 +383,51 @@
       "published": true,
       "publishedAt": "2026-11-05T05:20:00.000Z",
       "order": 4
+    },
+    {
+      "id": "seed-publicnonregular-20261106-1",
+      "union": "공공부문 비정규직 노동자",
+      "field": "공공부문 비정규직",
+      "headline": "공공부문 비정규직 노동자와 함께 만들겠습니다.",
+      "title": "정부-학교 등 모든 공무직 노동자 차별철폐-처우개선",
+      "content": "- 공무직 처우개선 예산 쟁취로 각종 수당 차별 철폐\n- 공무직 법제화로 차별 없는 노동과 일터 실현",
+      "poster": "/images/public-nonregular-poster-v1.webp",
+      "published": true,
+      "publishedAt": "2026-11-06T02:36:00.000Z",
+      "order": 1
+    },
+    {
+      "id": "seed-publicnonregular-20261106-2",
+      "union": "공공부문 비정규직 노동자",
+      "field": "공공부문 비정규직",
+      "headline": "공공부문 비정규직 노동자와 함께 만들겠습니다.",
+      "title": "중규직을 넘어 정규직 완성으로",
+      "content": "- 공공기관 무기계약직 직제구분 폐지 및 정규직화\n- 처우개선 가로 막는 총인건비 가이드라인 분쇄",
+      "published": true,
+      "publishedAt": "2026-11-06T02:36:00.000Z",
+      "order": 2
+    },
+    {
+      "id": "seed-publicnonregular-20261106-3",
+      "union": "공공부문 비정규직 노동자",
+      "field": "공공부문 비정규직",
+      "headline": "공공부문 비정규직 노동자와 함께 만들겠습니다.",
+      "title": "공공기관 간접고용 노동자 권리 보장",
+      "content": "- 공공발주 용역계약 체결 시 인건비 낙찰률 적용 배제 입법 쟁취\n- <용역근로자 근로조건 보호지침> 적용 확대 및 실효성 강화",
+      "published": true,
+      "publishedAt": "2026-11-06T02:36:00.000Z",
+      "order": 3
+    },
+    {
+      "id": "seed-publicnonregular-20261106-4",
+      "union": "공공부문 비정규직 노동자",
+      "field": "공공부문 비정규직",
+      "headline": "공공부문 비정규직 노동자와 함께 만들겠습니다.",
+      "title": "불안정노동자와 함께 싸우는 민주노총 경기도본부",
+      "content": "- 사내하청-공공부문 비정규직-특수고용-플랫폼 노동자가 함께 싸우는 <불안정노동특위> 구성\n- 경기도본부 운영위 참석 및 의결 참여 방안 마련 등 불안정노동자 대표성 확대\n- 고용형태를 뛰어넘는 연대투쟁 활성화",
+      "published": true,
+      "publishedAt": "2026-11-06T02:36:00.000Z",
+      "order": 4
     }
   ]
 }
