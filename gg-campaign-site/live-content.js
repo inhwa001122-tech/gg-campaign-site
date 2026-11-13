@@ -117,6 +117,8 @@ function renderSectors() {
     group.append(summary);
     const body = el('div', undefined, 'sector-card-body');
     const details = el('div', undefined, 'sector-fields-wrap');
+    const introduction = allPolicies.find(policy => policy.introduction)?.introduction;
+    if (introduction) details.append(el('p', introduction, 'sector-intro'));
     // The commitment is already the main card heading; don't repeat it below.
     {
       // Show the poster only in the collapsed card summary. Keep its sharing
