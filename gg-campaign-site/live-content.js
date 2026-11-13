@@ -34,7 +34,8 @@ const sectorAnchors = {
   '사회서비스노동자': 'social-service-policy',
   '학교비정규직·교육공무직노동자': 'school-worker-policy',
   '특수고용·플랫폼노동자': 'platform-worker-policy',
-  '공공부문 비정규직 노동자': 'public-nonregular-policy'
+  '공공부문 비정규직 노동자': 'public-nonregular-policy',
+  '소방노동자': 'firefighter-policy'
 };
 function sectorShareLink(union, poster) {
   if (union === '건설노동자' && poster === '/images/construction-poster.webp') {
@@ -64,6 +65,9 @@ function sectorShareLink(union, poster) {
   if (union === '공공부문 비정규직 노동자' && poster === '/images/public-nonregular-poster-v1.webp') {
     return location.origin + '/public-nonregular-poster.html?v=1';
   }
+  if (union === '소방노동자' && poster === '/images/firefighter-poster-v1.webp') {
+    return location.origin + '/firefighter-poster.html?v=1';
+  }
   return location.origin + '/#' + (sectorAnchors[union] || 'sectorPolicies');
 }
 async function copySectorLink(link, button) {
@@ -90,7 +94,7 @@ function renderSectors() {
   const now = Date.now();
   for (const [union, fields] of groups) {
     const group = el('details', undefined, 'sector-card'), summary = el('summary');
-    if (['IT노동자', '공무원노동자', '보건의료노동자', '사회서비스노동자', '학교비정규직·교육공무직노동자', '특수고용·플랫폼노동자', '공공부문 비정규직 노동자'].includes(union)) {
+    if (['IT노동자', '공무원노동자', '보건의료노동자', '사회서비스노동자', '학교비정규직·교육공무직노동자', '특수고용·플랫폼노동자', '공공부문 비정규직 노동자', '소방노동자'].includes(union)) {
       group.classList.add('worker-card-fullwidth');
     }
     const allPolicies = [...fields.values()].flat();
@@ -113,6 +117,8 @@ function renderSectors() {
     group.append(summary);
     const body = el('div', undefined, 'sector-card-body');
     const details = el('div', undefined, 'sector-fields-wrap');
+    const introduction = allPolicies.find(policy => policy.introduction)?.introduction;
+    if (introduction) details.append(el('p', introduction, 'sector-intro'));
     // The commitment is already the main card heading; don't repeat it below.
     {
       // Show the poster only in the collapsed card summary. Keep its sharing
