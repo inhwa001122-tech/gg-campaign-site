@@ -192,7 +192,7 @@ test('unpublished sector drafts stay private in public API but visible to admins
 test('construction seed publishes three revised policies even with pre-existing Netlify data', async () => {
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
-  assert.equal(seed.sectorPolicies.length, 30);
+  assert.equal(seed.sectorPolicies.length, 33);
   assert.deepEqual(seed.sectorPolicies.filter(p => p.union === '건설노동자').map(p => p.order), [1, 2, 3]);
   assert.ok(seed.sectorPolicies.every(p => p.published));
   assert.equal(seed.sectorPolicies.filter(p => p.union === '건설노동자' && p.field === '건설노조').length, 3);
@@ -208,15 +208,15 @@ test('construction seed publishes three revised policies even with pre-existing 
   assert.equal(read.body.news[0].title, '기존 소식');
   assert.equal(read.body.shorts.length, 1);
   assert.equal(read.body.videoUrl, 'https://www.youtube.com/watch?v=abcdefghijk');
-  assert.equal(read.body.sectorPolicies.length, 30);
+  assert.equal(read.body.sectorPolicies.length, 33);
   const admin = await f.request('GET', null, { query: '?admin=1' });
-  assert.equal(admin.body.sectorPolicies.length, 30);
+  assert.equal(admin.body.sectorPolicies.length, 33);
   const target = admin.body.sectorPolicies.find(p => p.order === 1);
   const updated = await f.request('PATCH', { kind: 'sectorPolicies', id: target.id, union: target.union,
     field: target.field, title: '수정 테스트', content: target.content, published: true,
     revision: admin.body.revision });
   assert.equal(updated.status, 200);
-  assert.equal(updated.body.sectorPolicies.length, 30);
+  assert.equal(updated.body.sectorPolicies.length, 33);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).headline, target.headline);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).order, 1);
   assert.equal(updated.body.sectorPolicies.find(p => p.id === target.id).publishedAt, target.publishedAt);
@@ -224,7 +224,7 @@ test('construction seed publishes three revised policies even with pre-existing 
   const deleted = await f.request('DELETE', { kind: 'sectorPolicies', id: target.id, revision: updated.body.revision });
   assert.equal(deleted.status, 200);
   const readAgain = await f.request('GET', null, { auth: false });
-  assert.equal(readAgain.body.sectorPolicies.length, 29);
+  assert.equal(readAgain.body.sectorPolicies.length, 32);
   assert.ok(!readAgain.body.sectorPolicies.some(p => p.id === target.id));
   assert.equal(readAgain.body.news.length, 1);
 });
@@ -426,7 +426,7 @@ test('IT, civil service and healthcare policies are added verbatim without chang
   const f = fixture(seed);
   const read = await f.request('GET', null, { auth: false });
   assert.equal(read.status, 200);
-  assert.equal(read.body.sectorPolicies.length, 30);
+  assert.equal(read.body.sectorPolicies.length, 33);
   for(const [k,name] of names.entries()) assert.equal(read.body.sectorPolicies.filter(p => p.union === name).length, counts[k]);
   assert.equal(read.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
   assert.equal(read.body.sectorPolicies.filter(p => p.union === '교육노동자').length, 3);
@@ -514,7 +514,7 @@ test('social-service, school staff and platform worker seed pledges are complete
   assert.match(platform[3].content, /<불안정노동특위> 구성/);
   const f = fixture(seed);
   const publicRead = await f.request('GET', null, {auth: false});
-  assert.equal(publicRead.body.sectorPolicies.length, 30);
+  assert.equal(publicRead.body.sectorPolicies.length, 33);
   for (const group of groups) assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === group.name).length, 4);
   assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
   assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === '교육노동자').length, 3);
@@ -532,7 +532,7 @@ test('public-sector nonregular worker pledges are complete and do not disturb th
     '공공기관 간접고용 노동자 권리 보장',
     '불안정노동자와 함께 싸우는 민주노총 경기도본부'
   ];
-  assert.equal(seed.sectorPolicies.length, 30);
+  assert.equal(seed.sectorPolicies.length, 33);
   assert.deepEqual(items.map(x => x.title), expectedTitles);
   assert.deepEqual(items.map(x => x.order), [1,2,3,4]);
   assert.deepEqual(items.map(x => x.content.split('\n').length), [2,2,2,3]);
@@ -551,10 +551,37 @@ test('public-sector nonregular worker pledges are complete and do not disturb th
   const f = fixture(seed);
   const publicRead = await f.request('GET', null, { auth:false });
   assert.equal(publicRead.status, 200);
-  assert.equal(publicRead.body.sectorPolicies.length, 30);
+  assert.equal(publicRead.body.sectorPolicies.length, 33);
   assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === union).length, 4);
   assert.equal(publicRead.body.sectorPolicies.filter(p => p.union !== union).length, 26);
   assert.equal(publicRead.body.sectorPolicies.find(p => p.id === items[0].id).poster, items[0].poster);
   assert.ok(publicRead.body.sectorPolicies.some(p => p.id === 'seed-construction-20261103-1'));
   assert.ok(publicRead.body.sectorPolicies.some(p => p.id === 'seed-education-20261103-1'));
+});
+
+
+test('firefighter sector pledges preserve the complete three-part 160,000-member proposal', async () => {
+  const { readFileSync } = await import('node:fs');
+  const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
+  const firefighters = seed.sectorPolicies.filter(p => p.union === '소방노동자');
+  assert.equal(firefighters.length, 3);
+  assert.deepEqual(firefighters.map(p => p.order), [1, 2, 3]);
+  assert.deepEqual(firefighters.map(p => p.content.split('\n').length), [3, 4, 3]);
+  assert.ok(firefighters.every(p => p.published && p.field === '소방'));
+  assert.ok(firefighters.every(p => p.headline === '소방노동자와 함께 만들겠습니다.'));
+  assert.equal(firefighters[0].introduction, '소방노동자의 생명과 권리, 16만 경기조합원의 연대로 함께 지키겠습니다!');
+  assert.equal(firefighters[0].poster, '/images/firefighter-poster-v1.webp');
+  assert.match(firefighters[0].content, /국립묘지 안장법 재개정으로 순직·공상 소방관 예우 강화/);
+  assert.match(firefighters[0].content, /휴일·연장근무수당 지급 법제화 및 삭감된 수당 쟁취/);
+  assert.match(firefighters[1].content, /퇴직 소방공무원 특수건강검진 조례 제정 조기 완료/);
+  assert.match(firefighters[1].content, /고위험 출동대원 맞춤형 특별휴가 확대/);
+  assert.match(firefighters[2].content, /경기소방지부-노동조합 합동 고위험 사업장 교차 안전점검권 확보/);
+  assert.match(firefighters[2].content, /4조 2교대 완전 정착을 위한 도민·노동자 10만 서명 운동/);
+  const f = fixture(seed);
+  const response = await f.request('GET', null, { auth: false });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.sectorPolicies.filter(p => p.union === '소방노동자').length, 3);
+  assert.equal(response.body.sectorPolicies.length, 33);
+  assert.equal(response.body.sectorPolicies.filter(p => p.union === '공공부문 비정규직 노동자').length, 4);
+  assert.equal(response.body.sectorPolicies.filter(p => p.union === '건설노동자').length, 3);
 });
