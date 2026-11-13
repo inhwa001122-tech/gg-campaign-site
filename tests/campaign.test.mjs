@@ -521,7 +521,7 @@ test('social-service, school staff and platform worker seed pledges are complete
 });
 
 
-test('public-sector nonregular worker pledges are complete and do not disturb the existing 26', async () => {
+test('public-sector nonregular worker pledges remain complete alongside all other sectors', async () => {
   const { readFileSync } = await import('node:fs');
   const seed = JSON.parse(readFileSync(new URL('../gg-campaign-site/content/site.json', import.meta.url), 'utf8'));
   const union = '공공부문 비정규직 노동자';
@@ -553,7 +553,7 @@ test('public-sector nonregular worker pledges are complete and do not disturb th
   assert.equal(publicRead.status, 200);
   assert.equal(publicRead.body.sectorPolicies.length, 33);
   assert.equal(publicRead.body.sectorPolicies.filter(p => p.union === union).length, 4);
-  assert.equal(publicRead.body.sectorPolicies.filter(p => p.union !== union).length, 26);
+  assert.equal(publicRead.body.sectorPolicies.filter(p => p.union !== union).length, 29);
   assert.equal(publicRead.body.sectorPolicies.find(p => p.id === items[0].id).poster, items[0].poster);
   assert.ok(publicRead.body.sectorPolicies.some(p => p.id === 'seed-construction-20261103-1'));
   assert.ok(publicRead.body.sectorPolicies.some(p => p.id === 'seed-education-20261103-1'));
